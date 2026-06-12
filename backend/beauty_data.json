@@ -1,0 +1,124 @@
+<USER_REQUEST>
+{
+  "category": "Beauty & Personal Care",
+  "products": [
+    {
+      "name": "Lakme Absolute Perfect Radiance Face Wash",
+      "brand": "Lakme",
+      "price": 249,
+      "description": "Brightening face wash enriched with micro-crystals for glowing skin.",
+      "image": "/products/beauty/lakme-absolute-facewash.jpg"
+    },
+    {
+      "name": "Mamaearth Ubtan Face Wash",
+      "brand": "Mamaearth",
+      "price": 299,
+      "description": "Turmeric and saffron-based face wash for tan removal and glowing skin.",
+      "image": "/products/beauty/mamaearth-ubtan-facewash.jpg"
+    },
+    {
+      "name": "Cetaphil Gentle Skin Cleanser",
+      "brand": "Cetaphil",
+      "price": 599,
+      "description": "Dermatologist-recommended cleanser suitable for sensitive skin.",
+      "image": "/products/beauty/cetaphil-cleanser.jpg"
+    },
+    {
+      "name": "Neutrogena Deep Clean Face Wash",
+      "brand": "Neutrogena",
+      "price": 325,
+      "description": "Deep cleansing face wash that removes dirt and excess oil.",
+      "image": "/products/beauty/neutrogena-deep-clean.jpg"
+    },
+    {
+      "name": "Himalaya Neem Face Wash",
+      "brand": "Himalaya",
+      "price": 199,
+      "description": "Neem-based face wash that helps prevent acne and pimples.",
+      "image": "/products/beauty/himalaya-neem-facewash.jpg"
+    },
+    {
+      "name": "L'Oreal Paris Revitalift Serum",
+      "brand": "L'Oreal",
+      "price": 899,
+      "description": "Anti-aging serum with hyaluronic acid for youthful skin.",
+      "image": "/products/beauty/loreal-revitalift-serum.jpg"
+    },
+    {
+      "name": "Minimalist Vitamin C Serum",
+      "brand": "Minimalist",
+      "price": 699,
+      "description": "10% Vitamin C serum for brighter and healthier skin.",
+      "image": "/products/beauty/minimalist-vitamin-c.jpg"
+    },
+    {
+      "name": "The Derma Co Niacinamide Serum",
+      "brand": "The Derma Co",
+      "price": 599,
+      "description": "Reduces acne marks and controls excess oil production.",
+      "image": "/
+<truncated 7905 bytes>
+toothpaste.jpg"
+    },
+    {
+      "name": "Listerine Mouthwash",
+      "brand": "Listerine",
+      "price": 299,
+      "description": "Antiseptic mouthwash for oral hygiene.",
+      "image": "/products/beauty/listerine-mouthwash.jpg"
+    },
+    {
+      "name": "Gillette Fusion Razor",
+      "brand": "Gillette",
+      "price": 499,
+      "description": "Precision razor for a smooth shaving experience.",
+      "image": "/products/beauty/gillette-fusion.jpg"
+    },
+    {
+      "name": "Bombay Shaving Company Beard Oil",
+      "brand": "Bombay Shaving Company",
+      "price": 299,
+      "description": "Beard oil that softens and nourishes facial hair.",
+      "image": "/products/beauty/beard-oil.jpg"
+    },
+    {
+      "name": "Veet Hair Removal Cream",
+      "brand": "Veet",
+      "price": 225,
+      "description": "Quick and effective hair removal cream.",
+      "image": "/products/beauty/veet-cream.jpg"
+    },
+    {
+      "name": "Nivea Men Face Wash",
+      "brand": "Nivea",
+      "price": 225,
+      "description": "Face wash designed for men's skin care needs.",
+      "image": "/products/beauty/nivea-men-facewash.jpg"
+    },
+    {
+      "name": "Beardo Activated Charcoal Face Wash",
+      "brand": "Beardo",
+      "price": 299,
+      "description": "Charcoal-based face wash for deep cleansing.",
+      "image": "/products/beauty/beardo-facewash.jpg"
+    },
+    {
+      "name": "Forest Essentials Facial Cleanser",
+      "brand": "Forest Essentials",
+      "price": 975,
+      "description": "Luxury Ayurvedic cleanser enriched with natural ingredients.",
+      "image": "/products/beauty/forest-essentials-cleanser.jpg"
+    },
+    {
+      "name": "Kama Ayurveda Rose Water",
+      "brand": "Kama Ayurveda",
+      "price": 450,
+      "description": "Pure rose water toner for refreshing and hydrating skin.",
+      "image": "/products/beauty/kama-rose-water.jpg"
+    }
+  ]
+} add these products in beauty category
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-06-06T16:48:29+05:30.
+</ADDITIONAL_METADATA>

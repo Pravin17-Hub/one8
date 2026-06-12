@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-on-background antialiased selection:bg-secondary-container selection:text-on-secondary-container min-h-screen flex flex-col font-body-md;
+    background-color: #f9fafb;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+  }
+  .glass-card:hover {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Added from product listing page */
+  .ai-panel {
+    background: rgba(59, 130, 246, 0.05);
+    backdrop-filter: blur(24px);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+  }
+  
+  .custom-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    background: #e5e7eb;
+    outline: none;
+    border-radius: 2px;
+  }
+  .custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0f172a;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(15, 23, 42, 0.2);
+  }
+}
+
+@layer utilities {
+  .ai-glow {
+    box-shadow: 0 0 32px rgba(59, 130, 246, 0.1);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}

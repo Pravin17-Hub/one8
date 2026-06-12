@@ -1,0 +1,7 @@
+export const ROLES = {
+  CUSTOMER: 'CUSTOMER',
+  SELLER: 'SELLER',
+  ADMIN: 'ADMIN',
+};
+
+export const PUBLIC_REGISTER_ROLES = [ROLES.CUSTOMER, ROLES.SELLER];

@@ -1,0 +1,63 @@
+src\components\TopNavBar.jsx:L27: navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+src\components\TopNavBar.jsx:L38: className={`fixed top-0 w-full z-50 flex flex-col backdrop-blur-xl border-b border-outline-variant/30 h-[72px] justify-center transition-all duration-300 ${
+src\pages\AdminDashboard.jsx:L61: className={`px-6 py-3 text-label-lg font-label-lg capitalize transition-colors ${
+src\pages\AdminDashboard.jsx:L77: <MetricCard title="Total Platform Revenue" value={`₹${stats?.platformRevenue?.toLocaleString(undefined, {minimumFractionDigits: 2})}`} icon="attach_money" color="text-[#10B981]" />
+src\pages\AdminDashboard.jsx:L80: <MetricCard title="Global AI Accuracy" value={`${stats?.globalAiAccuracy}%`} icon="psychology" color="text-primary" />
+src\pages\AdminDashboard.jsx:L112: <span className={`px-2 py-1 rounded-full text-xs font-semibold ${u.role === 'ADMIN' ? 'bg-error/20 text-error' : u.role === 'SELLER' ? 'bg-secondary/20 text-secondary' : 'bg-surface-variant text-on-surface-variant'}`}>
+src\pages\AdminDashboard.jsx:L141: <span className={`${log.type === 'INFO' ? 'text-blue-400' : log.type === 'WARNING' ? 'text-[#F59E0B]' : 'text-error'} font-bold w-16`}>[{log.type}]</span>
+src\pages\AdminDashboard.jsx:L165: <div className={`w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 ${color}`}>
+src\pages\AIShoppingAssistant.jsx:L54: <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+src\pages\AIShoppingAssistant.jsx:L55: <div className={`max-w-[80%] md:max-w-[60%] flex flex-col gap-2 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
+src\pages\AIShoppingAssistant.jsx:L58: <div className={`px-5 py-3 rounded-2xl text-body-md ${
+src\pages\AuctionDetails.jsx:L46: api.get(`/auctions/${id}`),
+src\pages\AuctionDetails.jsx:L47: api.get(`/auctions/${id}/bids`)
+src\pages\AuctionDetails.jsx:L73: const res = await api.post(`/auctions/${id}/bid`, { bidAmount });
+src\pages\AuctionDetails.jsx:L176: <li key={b.id} className={`flex justify-between items-center px-6 py-4 ${i === 0 ? 'bg-tertiary/5' : ''}`}>
+src\pages\AuctionDetails.jsx:L179: <span className={`text-body-md ${i === 0 ? 'font-bold text-on-surface' : 'text-on-surface-variant'}`}>
+src\pages\AuctionDetails.jsx:L184: <span className={`font-bold ${i === 0 ? 'text-tertiary text-title-md' : 'text-on-surface'}`}>₹{parseFloat(b.bid_amount).toFixed(2)}</span>
+src\pages\Auctions.jsx:L54: const res = await api.post(`/auctions/${auctionId}/bid`, { bidAmount: amount });
+src\pages\Auctions.jsx:L103: <div key={auction.id} onClick={() => navigate(`/auctions/${auction.id}`)} className="glass-card rounded-3xl overflow-hidden border border-white/10 hover:border-tertiary/50 transition-colors group flex flex-col relative cursor-pointer">
+src\pages\Auctions.jsx:L144: navigate(`/auctions/${auction.id}`);
+src\pages\Cart.jsx:L27: await api.put(`/cart/update/${cartId}`, { quantity: newQuantity });
+src\pages\Cart.jsx:L36: await api.delete(`/cart/remove/${cartId}`);
+src\pages\Checkout.jsx:L34: alert(`Order Success! Your order ID is: ${res.data.orderId}`);
+src\pages\GroupBuy.jsx:L37: const res = await api.post(`/group-buy/${sessionId}/join`);
+src\pages\GroupBuy.jsx:L84: onClick={() => navigate(`/group-buy/${session.id}`)}
+src\pages\GroupBuy.jsx:L114: style={{ width: `${Math.min(100, progress)}%` }}
+src\pages\GroupBuy.jsx:L132: navigate(`/group-buy/${session.id}`);
+src\pages\GroupBuyDetails.jsx:L44: const res = await api.get(`/group-buy/${id}`);
+src\pages\GroupBuyDetails.jsx:L62: const res = await api.post(`/group-buy/${id}/join`);
+src\pages\GroupBuyDetails.jsx:L143: style={{ width: `${progressPercent}%` }}
+src\pages\Home.jsx:L131: onClick={() => navigate(`/product/${product.id}`)}
+src\pages\Home.jsx:L146: onClick={(e) => { e.stopPropagation(); navigate(`/product/${product.id}`); }}
+src\pages\Home.jsx:L166: className={`glass-card p-6 rounded-3xl border border-white/10 cursor-pointer group transition-all duration-300 ${border} hover:-translate-y-1 relative overflow-hidden`}
+src\pages\Home.jsx:L168: <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full transition-colors duration-500 blur-2xl ${bg}`}></div>
+src\pages\Home.jsx:L170: <div className={`w-14 h-14 rounded-2xl bg-surface-container-high border border-white/5 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 ${color}`}>
+src\pages\LocalSellers.jsx:L18: const endpoint = city ? `/local-sellers?city=${encodeURIComponent(city)}` : '/local-sellers';
+src\pages\LocalSellers.jsx:L108: <div key={product.id} onClick={() => navigate(`/product/${product.id}`)} className="cursor-pointer group/item">
+src\pages\OrderDetails.jsx:L24: const { data } = await api.get(`/orders/${id}`);
+src\pages\OrderDetails.jsx:L81: className={`px-3 py-1 rounded-full text-label-sm font-semibold ${
+src\pages\OrderDetails.jsx:L107: to={`/product/${item.product_id}`}
+src\pages\OrderHistory.jsx:L52: <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+src\pages\OrderHistory.jsx:L68: <button onClick={() => navigate(`/orders/${order.id}`)} className="text-primary hover:text-primary/80 font-bold flex items-center gap-1">
+src\pages\ProductDetails.jsx:L21: const res = await api.get(`/products/${id}`);
+src\pages\ProductDetails.jsx:L30: const relRes = await api.get(`/products?category_id=${res.data.category_id}&limit=5`);
+src\pages\ProductDetails.jsx:L102: <img src={img.image_url} alt={`${product.title} thumbnail`} className="w-full h-full object-contain mix-blend-multiply" />
+src\pages\ProductDetails.jsx:L199: onClick={() => navigate(`/product/${relProduct.id}`)}
+src\pages\ProductDetails.jsx:L233: if (relProduct.stock_quantity > 0) navigate(`/product/${relProduct.id}`);
+src\pages\ProductListing.jsx:L31: if (search) endpoint += `search=${encodeURIComponent(search)}&`;
+src\pages\ProductListing.jsx:L32: if (categoryId) endpoint += `category_id=${categoryId}&`;
+src\pages\ProductListing.jsx:L76: className={`px-4 py-2 rounded-full whitespace-nowrap font-bold transition-colors text-sm ${selectedCategory === null ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:border-outline-variant/60'}`}
+src\pages\ProductListing.jsx:L84: className={`px-4 py-2 rounded-full whitespace-nowrap font-bold transition-colors text-sm ${selectedCategory === c.id ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:border-outline-variant/60'}`}
+src\pages\ProductListing.jsx:L112: onClick={() => navigate(`/product/${product.id}`)}
+src\pages\ProductListing.jsx:L133: if (product.stock_quantity > 0) navigate(`/product/${product.id}`);
+src\pages\Profile.jsx:L87: <div className={`p-4 rounded-lg mb-6 text-sm ${message.includes('success') ? 'bg-secondary/20 text-secondary' : 'bg-error/20 text-error'}`}>
+src\pages\SellerDashboard.jsx:L73: await api.put(`/products/${editingProduct.id}`, formData);
+src\pages\SellerDashboard.jsx:L90: await api.delete(`/products/${id}`);
+src\pages\SellerDashboard.jsx:L117: <button key={tab} onClick={() => setActiveTab(tab)} className={`px-6 py-3 text-label-lg font-label-lg capitalize transition-colors ${activeTab === tab ? 'text-primary border-b-2 border-primary' : 'text-on-surface-variant hover:text-on-surface'}`}>
+src\pages\SellerDashboard.jsx:L127: <MetricCard title="Total Revenue" value={`₹${stats?.revenue?.toLocaleString(undefined, {minimumFractionDigits: 2})}`} icon="payments" color="text-[#10B981]" />
+src\pages\SellerDashboard.jsx:L130: <MetricCard title="AI Match Score" value={`${stats?.matchScore}%`} icon="psychology" color="text-primary" />
+src\pages\SellerDashboard.jsx:L154: <span className={`px-2 py-1 rounded-full text-xs font-semibold ${product.status === 'ACTIVE' ? 'bg-secondary/20 text-secondary' : 'bg-error/20 text-error'}`}>
+src\pages\SellerDashboard.jsx:L240: <div className={`w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center border border-white/5 ${color}`}>
+src\utils\api.js:L14: config.headers.Authorization = `Bearer ${token}`;
+src\utils\api.js:L59: originalRequest.headers.Authorization = `Bearer ${newToken}`;

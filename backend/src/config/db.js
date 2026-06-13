@@ -4,7 +4,13 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const { Pool } = pg;
-
+console.log({
+  host: process.env.DB_HOST,
+  port: process.env.DB_PORT,
+  user: process.env.DB_USER,
+  db: process.env.DB_NAME,
+  hasDatabaseUrl: !!process.env.DATABASE_URL
+});
 const pool = new Pool(
   process.env.DATABASE_URL
     ? {

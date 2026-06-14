@@ -24,8 +24,6 @@ export default function Checkout() {
   const [upiId, setUpiId] = useState('');
   const [utrNumber, setUtrNumber] = useState('');
   const [paymentStep, setPaymentStep] = useState('');
-  const [qrPaymentDetected, setQrPaymentDetected] = useState(false);
-  const [qrDetectionTimer, setQrDetectionTimer] = useState(8);
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -97,41 +95,14 @@ export default function Checkout() {
         return;
       }
     } else {
-      if (!utrNumber.trim() && !qrPaymentDetected) {
+      if (!utrNumber.trim() || utrNumber.trim().length < 6) {
         alert('Please enter a valid UPI Ref/UTR transaction reference number.');
         return;
       }
     }
     
-    const finalUtr = utrNumber || `UTR${Math.floor(100000000000 + Math.random() * 900000000000)}`;
-    submitOrder(finalUtr);
+    submitOrder(utrNumber);
   };
-
-  useEffect(() => {
-    let timer;
-    if (paymentMethod === 'qr' && !processing && !qrPaymentDetected) {
-      timer = setInterval(() => {
-        setQrDetectionTimer((prev) => {
-          if (prev <= 1) {
-            clearInterval(timer);
-            const mockUtr = `UTR${Math.floor(100000000000 + Math.random() * 900000000000)}`;
-            setUtrNumber(mockUtr);
-            setQrPaymentDetected(true);
-            
-            // Auto-place order if address is fully filled
-            if (firstName.trim() && lastName.trim() && addressLine1.trim() && city.trim() && postalCode.trim()) {
-              submitOrder(mockUtr);
-            }
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      setQrDetectionTimer(8);
-    }
-    return () => clearInterval(timer);
-  }, [paymentMethod, processing, qrPaymentDetected, firstName, lastName, addressLine1, city, postalCode]);
 
   const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
@@ -323,37 +294,6 @@ export default function Checkout() {
                 <div className="space-y-1">
                   <p className="text-label-sm text-secondary font-bold">UPI ID: {payeeUpiId}</p>
                   <p className="text-label-sm text-on-surface-variant font-mono">Amount: ₹{amountVal}</p>
-                </div>
-                
-                {/* Auto placement status simulator */}
-                <div className="bg-surface-container-high/60 p-4 rounded-xl border border-white/5 space-y-2 mt-4">
-                  {!qrPaymentDetected ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <div className="flex items-center gap-2 text-sm text-on-surface-variant">
-                        <span className="material-symbols-outlined animate-spin text-sm text-primary">sync</span>
-                        <span>Auto-detecting payment status in {qrDetectionTimer}s...</span>
-                      </div>
-                      <button 
-                        type="button"
-                        onClick={() => {
-                          const mockUtr = `UTR${Math.floor(100000000000 + Math.random() * 900000000000)}`;
-                          setUtrNumber(mockUtr);
-                          setQrPaymentDetected(true);
-                          if (firstName.trim() && lastName.trim() && addressLine1.trim() && city.trim() && postalCode.trim()) {
-                            submitOrder(mockUtr);
-                          }
-                        }}
-                        className="text-xs text-secondary hover:underline font-bold"
-                      >
-                        Simulate Payment Success Now
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center gap-2 text-sm text-[#10B981] font-bold py-1">
-                      <span className="material-symbols-outlined">check_circle</span>
-                      <span>Payment detected successfully!</span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="text-left mt-4">

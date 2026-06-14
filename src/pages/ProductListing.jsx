@@ -66,7 +66,12 @@ export default function ProductListing() {
       setLoading(false);
     }
   };
+const res = await api.get(endpoint);
 
+console.log("Products API response:", res.data);
+console.log("Count:", res.data?.length);
+
+setProducts(res.data);
   const handleSearch = (e) => {
     e.preventDefault();
     const params = new URLSearchParams();

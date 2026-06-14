@@ -11,8 +11,9 @@ import pool from '../src/config/db.js';
 
 async function seedJson() {
   console.log('Connecting to database...');
-  const data = JSON.parse(fs.readFileSync(resolve(__dirname, 'dummy-products.json'), 'utf-8'));
-  const products = data.products;
+ const products = JSON.parse(
+  fs.readFileSync(resolve(__dirname, 'product.json'), 'utf-8')
+);
 
   // Get a default store_id
   let storeRes = await pool.query('SELECT id FROM stores LIMIT 1');

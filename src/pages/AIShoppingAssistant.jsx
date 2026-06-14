@@ -69,6 +69,7 @@ export default function AIShoppingAssistant() {
                     {msg.suggestions.map((item, idx) => (
                       <div key={idx} className="w-full sm:w-[250px]">
                         <ProductCard 
+                          id={item.id}
                           title={item.title} 
                           price={item.price} 
                           imageIcon={item.imageIcon} 

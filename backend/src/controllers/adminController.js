@@ -98,3 +98,77 @@ export const getAllGroupBuys = async (req, res) => {
   }
 };
 
+export const getAllProductsAdmin = async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT p.*, pi.image_url, pc.category_id, c.name as category_name
+      FROM products p
+      LEFT JOIN product_images pi ON pi.product_id = p.id AND pi.is_primary = true
+      LEFT JOIN product_categories pc ON pc.product_id = p.id
+      LEFT JOIN categories c ON c.id = pc.category_id
+      ORDER BY p.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Failed to fetch admin products', error);
+    res.status(500).json({ error: 'Failed to fetch all products' });
+  }
+};
+
+export const getAllOrdersAdmin = async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT o.id, o.total_amount, o.status, o.payment_status, o.created_at,
+             u.first_name || ' ' || u.last_name as customer_name, u.email as customer_email,
+             a.full_name as shipping_name, a.phone as shipping_phone,
+             a.address_line_1, a.address_line_2, a.city, a.state, a.postal_code, a.country
+      FROM orders o
+      JOIN users u ON o.customer_id = u.id
+      LEFT JOIN addresses a ON o.address_id = a.id
+      ORDER BY o.created_at DESC
+    `);
+    
+    // For each order, fetch items
+    const orders = result.rows;
+    for (const order of orders) {
+      const itemsRes = await query(`
+        SELECT oi.quantity, oi.price_at_time, p.title
+        FROM order_items oi
+        LEFT JOIN products p ON oi.product_id = p.id
+        WHERE oi.order_id = $1
+      `, [order.id]);
+      order.items = itemsRes.rows;
+    }
+    
+    res.json(orders);
+  } catch (error) {
+    console.error('Failed to fetch admin orders', error);
+    res.status(500).json({ error: 'Failed to fetch all orders' });
+  }
+};
+
+export const updateOrderStatusAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    
+    if (!status) {
+      return res.status(400).json({ error: 'Order status is required' });
+    }
+    
+    const result = await query(
+      "UPDATE orders SET status = $1 WHERE id = $2 RETURNING *",
+      [status, id]
+    );
+    
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Failed to update order status', error);
+    res.status(500).json({ error: 'Failed to update order status' });
+  }
+};
+

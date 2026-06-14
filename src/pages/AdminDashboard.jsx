@@ -11,6 +11,7 @@ export default function AdminDashboard() {
   const [auctions, setAuctions] = useState([]);
   const [groupBuys, setGroupBuys] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Modals & Forms State
@@ -47,10 +48,11 @@ export default function AdminDashboard() {
         api.get('/admin/stats'),
         api.get('/admin/users'),
         api.get('/admin/system-health'),
-        api.get('/products?limit=100'),
+        api.get('/admin/products'),
         api.get('/admin/auctions'),
         api.get('/admin/group-buys'),
-        api.get('/products/categories')
+        api.get('/products/categories'),
+        api.get('/admin/orders')
       ]);
 
       if (results[0].status === 'fulfilled') setStats(results[0].value.data);
@@ -60,6 +62,7 @@ export default function AdminDashboard() {
       if (results[4].status === 'fulfilled') setAuctions(results[4].value.data);
       if (results[5].status === 'fulfilled') setGroupBuys(results[5].value.data);
       if (results[6].status === 'fulfilled') setCategories(results[6].value.data);
+      if (results[7].status === 'fulfilled') setOrders(results[7].value.data);
 
     } catch (error) {
       console.error('Failed to fetch admin data', error);
@@ -197,6 +200,16 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    try {
+      await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    } catch (error) {
+      console.error('Failed to update order status', error);
+      alert('Failed to update order status.');
+    }
+  };
+
   if (loading) {
     return (
       <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-[calc(100vh-72px)] flex items-center justify-center">
@@ -232,7 +245,7 @@ export default function AdminDashboard() {
 
       {/* Tabs */}
       <div className="flex border-b border-white/10 mb-8 overflow-x-auto scrollbar-hide">
-        {['overview', 'users', 'products', 'auctions', 'group buys', 'system logs'].map((tab) => (
+        {['overview', 'users', 'products', 'auctions', 'group buys', 'orders', 'system logs'].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -325,8 +338,28 @@ export default function AdminDashboard() {
                         {product.status}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
-                      <button onClick={() => openProductModal(product)} className="text-on-surface-variant hover:text-primary transition-colors mr-3" title="Edit Product">
+                    <td className="p-4 text-right space-x-2">
+                      <button 
+                        onClick={() => {
+                          setAuctionForm({ product_id: product.id, starting_price: Math.round(parseFloat(product.price) * 0.8), ends_at: '' });
+                          setIsAuctionModalOpen(true);
+                        }} 
+                        className="text-on-surface-variant hover:text-secondary transition-colors" 
+                        title="Start Auction"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">gavel</span>
+                      </button>
+                      <button 
+                        onClick={() => {
+                          setGroupBuyForm({ product_id: product.id, target_quantity: 10, discount_price: Math.round(parseFloat(product.price) * 0.8), expires_at: '' });
+                          setIsGroupBuyModalOpen(true);
+                        }} 
+                        className="text-on-surface-variant hover:text-tertiary transition-colors" 
+                        title="Start Group Buy"
+                      >
+                        <span className="material-symbols-outlined text-[20px]">group</span>
+                      </button>
+                      <button onClick={() => openProductModal(product)} className="text-on-surface-variant hover:text-primary transition-colors" title="Edit Product">
                         <span className="material-symbols-outlined text-[20px]">edit</span>
                       </button>
                       <button onClick={() => handleDeleteProduct(product.id)} className="text-on-surface-variant hover:text-error transition-colors" title="Delete Product">
@@ -417,6 +450,54 @@ export default function AdminDashboard() {
                           </button>
                         </>
                       )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {activeTab === 'orders' && (
+          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">
+                  <th className="p-4">Order ID</th>
+                  <th className="p-4">Customer</th>
+                  <th className="p-4">Items</th>
+                  <th className="p-4">Total</th>
+                  <th className="p-4">Date</th>
+                  <th className="p-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
+                    <td className="p-4 text-body-sm text-on-surface-variant font-mono">{order.id.slice(0, 8)}...</td>
+                    <td className="p-4">
+                      <div className="text-body-md text-on-surface font-medium">{order.customer_name}</div>
+                      <div className="text-body-sm text-on-surface-variant">{order.customer_email}</div>
+                    </td>
+                    <td className="p-4 text-body-md text-on-surface-variant">
+                      <div className="max-w-[250px] truncate" title={order.items?.map(i => `${i.title} (x${i.quantity})`).join(', ')}>
+                        {order.items?.map(i => `${i.title} (x${i.quantity})`).join(', ')}
+                      </div>
+                    </td>
+                    <td className="p-4 text-body-md text-secondary font-bold font-mono">₹{parseFloat(order.total_amount).toLocaleString()}</td>
+                    <td className="p-4 text-body-sm text-on-surface-variant">{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td className="p-4">
+                      <select 
+                        value={order.status} 
+                        onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value)}
+                        className="bg-surface-container border border-white/10 rounded-lg p-2 text-on-surface outline-none text-xs"
+                      >
+                        <option value="PENDING">PENDING</option>
+                        <option value="PAID">PAID</option>
+                        <option value="SHIPPED">SHIPPED</option>
+                        <option value="DELIVERED">DELIVERED</option>
+                        <option value="CANCELLED">CANCELLED</option>
+                      </select>
                     </td>
                   </tr>
                 ))}

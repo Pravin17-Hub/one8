@@ -1,6 +1,19 @@
-export default function ProductCard({ title, price, imageIcon, imageUrl, matchScore = 95 }) {
+import { useNavigate } from 'react-router-dom';
+
+export default function ProductCard({ id, title, price, imageIcon, imageUrl, matchScore = 95 }) {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    if (id) {
+      navigate(`/product/${id}`);
+    }
+  };
+
   return (
-    <div className="glass-card rounded-xl p-4 flex flex-col gap-3 group hover:-translate-y-1 transition-transform cursor-pointer">
+    <div 
+      onClick={handleClick}
+      className="glass-card rounded-xl p-4 flex flex-col gap-3 group hover:-translate-y-1 transition-transform cursor-pointer"
+    >
       <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-surface-container flex items-center justify-center">
         {imageUrl ? (
           <img src={imageUrl} alt={title} className="w-full h-full object-contain mix-blend-multiply" />

@@ -28,10 +28,17 @@ export default function ProductDetails() {
           rating: (Math.random() * 1 + 4).toFixed(1)
         });
         
+        let related = [];
         if (res.data.category_id) {
-          const relRes = await api.get(`/products?category_id=${res.data.category_id}&limit=5`);
-          setRelatedProducts(relRes.data.filter(p => p.id !== id).slice(0, 4));
+          const relRes = await api.get(`/products?category_id=${res.data.category_id}&limit=10`);
+          related = relRes.data.filter(p => p.id !== id);
         }
+        if (related.length < 4) {
+          const fallbackRes = await api.get('/products?limit=15');
+          const fallbackFiltered = fallbackRes.data.filter(p => p.id !== id && !related.some(r => r.id === p.id));
+          related = [...related, ...fallbackFiltered].slice(0, 4);
+        }
+        setRelatedProducts(related);
       } catch (error) {
         console.error('Failed to load product details', error);
       } finally {

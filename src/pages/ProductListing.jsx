@@ -57,7 +57,12 @@ export default function ProductListing() {
       let endpoint = '/products?';
       if (search) endpoint += `search=${encodeURIComponent(search)}&`;
       if (categoryId) endpoint += `category_id=${categoryId}&`;
-      
+      const res = await api.get(endpoint);
+
+console.log("API RESPONSE", res.data);
+console.log("COUNT", res.data.length);
+
+setProducts(res.data);
       const res = await api.get(endpoint);
       setProducts(res.data);
     } catch (error) {

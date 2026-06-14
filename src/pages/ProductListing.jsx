@@ -72,16 +72,31 @@ export default function ProductListing() {
     setLoading(false);
   }
 };
+const handleCategoryClick = (categoryId) => {
+  const newCat = selectedCategory === categoryId ? null : categoryId;
+  const params = new URLSearchParams();
+  if (searchQuery.trim()) params.set('search', searchQuery.trim());
+  if (newCat) params.set('category_id', newCat);
+  navigate(`/products?${params.toString()}`);
+};
 
-  const handleCategoryClick = (categoryId) => {
-    const newCat = selectedCategory === categoryId ? null : categoryId;
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set('search', searchQuery.trim());
-    if (newCat) params.set('category_id', newCat);
-    navigate(`/products?${params.toString()}`);
-  };
+const handleSearch = (e) => {
+  e.preventDefault();
 
-  return (
+  const params = new URLSearchParams();
+
+  if (searchQuery.trim()) {
+    params.set('search', searchQuery.trim());
+  }
+
+  if (selectedCategory) {
+    params.set('category_id', selectedCategory);
+  }
+
+  navigate(`/products?${params.toString()}`);
+};
+
+return (
     <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen flex flex-col">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <h1 className="text-headline-lg font-headline-lg text-on-surface">Discover Products</h1>

@@ -102,6 +102,12 @@ export default function Checkout() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
+  const payeeUpiId = 'one8store@okaxis'; 
+  const payeeName = 'One8 Marketplace';
+  const amountVal = subtotal.toFixed(2);
+  const upiLink = `upi://pay?pa=${payeeUpiId}&pn=${encodeURIComponent(payeeName)}&am=${amountVal}&cu=INR&tn=${encodeURIComponent('One8 Order')}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiLink)}&color=0f172a&bgcolor=ffffff`;
+
   if (loading) return <main className="flex-1 lg:ml-64 min-h-screen flex items-center justify-center"><span className="material-symbols-outlined animate-spin text-4xl text-primary">autorenew</span></main>;
 
   return (
@@ -274,40 +280,17 @@ export default function Checkout() {
             {paymentMethod === 'qr' && (
               <div className="space-y-4 text-center">
                 <p className="text-body-sm text-on-surface-variant">Scan QR Code using GPay, PhonePe, or Paytm</p>
-                <svg className="w-44 h-44 mx-auto bg-white p-2 rounded-xl border border-white/10 shadow-lg" viewBox="0 0 100 100">
-                  <rect x="0" y="0" width="100" height="100" fill="white" />
-                  <rect x="5" y="5" width="25" height="25" fill="black" />
-                  <rect x="9" y="9" width="17" height="17" fill="white" />
-                  <rect x="13" y="13" width="9" height="9" fill="black" />
-                  <rect x="70" y="5" width="25" height="25" fill="black" />
-                  <rect x="74" y="9" width="17" height="17" fill="white" />
-                  <rect x="78" y="13" width="9" height="9" fill="black" />
-                  <rect x="5" y="70" width="25" height="25" fill="black" />
-                  <rect x="9" y="74" width="17" height="17" fill="white" />
-                  <rect x="13" y="78" width="9" height="9" fill="black" />
-                  <rect x="75" y="75" width="10" height="10" fill="black" />
-                  <rect x="77" y="77" width="6" height="6" fill="white" />
-                  <rect x="79" y="79" width="2" height="2" fill="black" />
-                  <rect x="35" y="5" width="5" height="15" fill="black" />
-                  <rect x="45" y="10" width="10" height="5" fill="black" />
-                  <rect x="60" y="5" width="5" height="5" fill="black" />
-                  <rect x="35" y="25" width="15" height="5" fill="black" />
-                  <rect x="55" y="20" width="5" height="10" fill="black" />
-                  <rect x="5" y="35" width="15" height="5" fill="black" />
-                  <rect x="25" y="35" width="5" height="15" fill="black" />
-                  <rect x="35" y="35" width="30" height="5" fill="black" />
-                  <rect x="40" y="45" width="5" height="15" fill="black" />
-                  <rect x="55" y="40" width="10" height="15" fill="black" />
-                  <rect x="70" y="35" width="5" height="20" fill="black" />
-                  <rect x="80" y="40" width="15" height="5" fill="black" />
-                  <rect x="85" y="50" width="5" height="15" fill="black" />
-                  <rect x="5" y="60" width="15" height="5" fill="black" />
-                  <rect x="25" y="60" width="15" height="5" fill="black" />
-                  <rect x="35" y="70" width="10" height="5" fill="black" />
-                  <rect x="40" y="80" width="25" height="5" fill="black" />
-                  <rect x="50" y="70" width="5" height="10" fill="black" />
-                  <rect x="70" y="70" width="5" height="5" fill="black" />
-                </svg>
+                <div className="w-48 h-48 mx-auto bg-white p-3 rounded-xl border border-white/10 shadow-lg flex items-center justify-center">
+                  <img 
+                    src={qrCodeUrl} 
+                    alt="UPI Payment QR Code" 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-label-sm text-secondary font-bold">UPI ID: {payeeUpiId}</p>
+                  <p className="text-label-sm text-on-surface-variant font-mono">Amount: ₹{amountVal}</p>
+                </div>
                 <div className="text-left mt-4">
                   <label className="text-label-md text-on-surface-variant block mb-1">Transaction Ref/UTR Number</label>
                   <input 

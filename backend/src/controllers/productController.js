@@ -337,32 +337,48 @@ export const updateProduct = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, description, price, stock_quantity, status, category_id, image_url } = req.body;
+    const isAdminUser = req.user.role === 'ADMIN';
 
-    let storeRes = await query('SELECT id FROM stores WHERE owner_id = $1', [req.user.id]);
-    if (storeRes.rows.length === 0) {
-      // Auto-create default store for the seller
-      const userRes = await query('SELECT first_name, last_name FROM users WHERE id = $1', [req.user.id]);
-      const name = userRes.rows.length > 0 
-        ? `${userRes.rows[0].first_name}'s Store` 
-        : 'My Store';
-      storeRes = await query(
-        'INSERT INTO stores (owner_id, name, description) VALUES ($1, $2, $3) RETURNING id',
-        [req.user.id, name, 'Welcome to my official store!']
-      );
+    let result;
+    if (isAdminUser) {
+      result = await query(`
+        UPDATE products 
+        SET title = COALESCE($1, title),
+            description = COALESCE($2, description),
+            price = COALESCE($3, price),
+            stock_quantity = COALESCE($4, stock_quantity),
+            status = COALESCE($5, status),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $6
+        RETURNING *
+      `, [title, description, price, stock_quantity, status, id]);
+    } else {
+      let storeRes = await query('SELECT id FROM stores WHERE owner_id = $1', [req.user.id]);
+      if (storeRes.rows.length === 0) {
+        // Auto-create default store for the seller
+        const userRes = await query('SELECT first_name, last_name FROM users WHERE id = $1', [req.user.id]);
+        const name = userRes.rows.length > 0 
+          ? `${userRes.rows[0].first_name}'s Store` 
+          : 'My Store';
+        storeRes = await query(
+          'INSERT INTO stores (owner_id, name, description) VALUES ($1, $2, $3) RETURNING id',
+          [req.user.id, name, 'Welcome to my official store!']
+        );
+      }
+      const store_id = storeRes.rows[0].id;
+
+      result = await query(`
+        UPDATE products 
+        SET title = COALESCE($1, title),
+            description = COALESCE($2, description),
+            price = COALESCE($3, price),
+            stock_quantity = COALESCE($4, stock_quantity),
+            status = COALESCE($5, status),
+            updated_at = CURRENT_TIMESTAMP
+        WHERE id = $6 AND store_id = $7
+        RETURNING *
+      `, [title, description, price, stock_quantity, status, id, store_id]);
     }
-    const store_id = storeRes.rows[0].id;
-
-    const result = await query(`
-      UPDATE products 
-      SET title = COALESCE($1, title),
-          description = COALESCE($2, description),
-          price = COALESCE($3, price),
-          stock_quantity = COALESCE($4, stock_quantity),
-          status = COALESCE($5, status),
-          updated_at = CURRENT_TIMESTAMP
-      WHERE id = $6 AND store_id = $7
-      RETURNING *
-    `, [title, description, price, stock_quantity, status, id, store_id]);
 
     if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found or unauthorized' });
     const product = result.rows[0];
@@ -390,11 +406,17 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     const { id } = req.params;
+    const isAdminUser = req.user.role === 'ADMIN';
     
-    const storeRes = await query('SELECT id FROM stores WHERE owner_id = $1', [req.user.id]);
-    if (storeRes.rows.length === 0) return res.status(403).json({ error: 'No store found' });
+    let result;
+    if (isAdminUser) {
+      result = await query('DELETE FROM products WHERE id = $1 RETURNING id', [id]);
+    } else {
+      const storeRes = await query('SELECT id FROM stores WHERE owner_id = $1', [req.user.id]);
+      if (storeRes.rows.length === 0) return res.status(403).json({ error: 'No store found' });
+      result = await query('DELETE FROM products WHERE id = $1 AND store_id = $2 RETURNING id', [id, storeRes.rows[0].id]);
+    }
 
-    const result = await query('DELETE FROM products WHERE id = $1 AND store_id = $2 RETURNING id', [id, storeRes.rows[0].id]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'Product not found or unauthorized' });
     
     res.json({ message: 'Product deleted successfully' });
@@ -604,3 +626,22 @@ const findCandidatesHelper = async (keyword) => {
     return [];
   }
 };
+
+export const createCategory = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ error: 'Category name is required' });
+    }
+    const checkRes = await query('SELECT * FROM categories WHERE name ILIKE $1', [name.trim()]);
+    if (checkRes.rows.length > 0) {
+      return res.json(checkRes.rows[0]);
+    }
+    const result = await query('INSERT INTO categories (name) VALUES ($1) RETURNING *', [name.trim()]);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Server error creating category' });
+  }
+};
+

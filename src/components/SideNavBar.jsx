@@ -17,6 +17,9 @@ export default function SideNavBar() {
   if (user && (user.role === 'SELLER' || user.role === 'ADMIN')) {
     navItems.push({ name: 'Add Products', icon: 'add_business', path: '/seller/dashboard' });
   }
+  if (user && user.role === 'ADMIN') {
+    navItems.push({ name: 'Admin Panel', icon: 'admin_panel_settings', path: '/admin/dashboard' });
+  }
 
   return (
     <nav className="hidden lg:flex flex-col py-6 bg-surface-container-low dark:bg-surface-container-low h-[calc(100vh-72px)] w-64 docked left-0 border-r border-white/5 shadow-xl fixed top-[72px] overflow-y-auto scrollbar-hide z-40">

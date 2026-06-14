@@ -145,3 +145,39 @@ export const placeBid = async (req, res) => {
     res.status(500).json({ error: 'Failed to place bid' });
   }
 };
+
+export const createAuction = async (req, res) => {
+  try {
+    const { product_id, starting_price, ends_at } = req.body;
+    if (!product_id || !starting_price || !ends_at) {
+      return res.status(400).json({ error: 'product_id, starting_price, and ends_at are required' });
+    }
+    const result = await query(
+      "INSERT INTO auctions (product_id, starting_price, current_highest_bid, ends_at, status) VALUES ($1, $2, $2, $3, 'ACTIVE') RETURNING *",
+      [product_id, starting_price, ends_at]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Failed to create auction', error);
+    res.status(500).json({ error: 'Failed to create auction' });
+  }
+};
+
+export const completeAuction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    // Standard update status to completed
+    const result = await query(
+      "UPDATE auctions SET status = 'COMPLETED', ends_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Auction not found' });
+    }
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Failed to complete auction', error);
+    res.status(500).json({ error: 'Failed to complete auction' });
+  }
+};
+

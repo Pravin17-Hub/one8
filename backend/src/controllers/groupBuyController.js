@@ -371,3 +371,45 @@ export const joinSession = async (req, res) => {
     res.status(500).json({ error: 'Failed to join session' });
   }
 };
+
+export const createGroupBuy = async (req, res) => {
+  try {
+    const { product_id, target_quantity, discount_price, expires_at } = req.body;
+    if (!product_id || !target_quantity || !discount_price || !expires_at) {
+      return res.status(400).json({ error: 'product_id, target_quantity, discount_price, and expires_at are required' });
+    }
+    const result = await query(
+      "INSERT INTO group_buy_sessions (product_id, target_quantity, current_quantity, discount_price, expires_at, status) VALUES ($1, $2, 0, $3, $4, 'ACTIVE') RETURNING *",
+      [product_id, target_quantity, discount_price, expires_at]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Failed to create group buy', error);
+    res.status(500).json({ error: 'Failed to create group buy' });
+  }
+};
+
+export const completeGroupBuy = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { forceSuccess } = req.body;
+    
+    const sessionRes = await query("SELECT * FROM group_buy_sessions WHERE id = $1", [id]);
+    if (sessionRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Group buy session not found' });
+    }
+    
+    const session = sessionRes.rows[0];
+    const status = (forceSuccess || parseInt(session.current_quantity) >= parseInt(session.target_quantity)) ? 'COMPLETED' : 'FAILED';
+    
+    const result = await query(
+      "UPDATE group_buy_sessions SET status = $1, expires_at = CURRENT_TIMESTAMP WHERE id = $2 RETURNING *",
+      [status, id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Failed to complete group buy', error);
+    res.status(500).json({ error: 'Failed to complete group buy' });
+  }
+};
+

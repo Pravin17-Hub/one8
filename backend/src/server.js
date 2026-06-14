@@ -20,9 +20,23 @@ const app = express();
 const PORT = process.env.PORT || 5005;
 const CLIENT_URL = process.env.CLIENT_URL || 'http://localhost:5173';
 
+const allowedOrigins = CLIENT_URL.split(',').map(o => o.trim());
+
 app.use(
   cors({
-    origin: CLIENT_URL,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      
+      const isAllowed = allowedOrigins.some(opt => origin === opt || origin.startsWith(opt)) 
+        || origin.endsWith('.vercel.app') 
+        || origin.includes('localhost');
+        
+      if (isAllowed) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );

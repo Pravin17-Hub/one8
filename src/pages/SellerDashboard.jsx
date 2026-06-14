@@ -17,6 +17,8 @@ export default function SellerDashboard() {
   const [formData, setFormData] = useState({ title: '', description: '', price: '', stock_quantity: 0, status: 'ACTIVE', category_id: '', image_url: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [categories, setCategories] = useState([]);
+  const [isAddingCategory, setIsAddingCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
 
   const navigate = useNavigate();
 
@@ -88,6 +90,24 @@ export default function SellerDashboard() {
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
+    setIsAddingCategory(false);
+    setNewCategoryName('');
+  };
+
+  const handleAddCategorySubmit = async (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) return;
+    try {
+      const res = await api.post('/products/categories', { name: newCategoryName.trim() });
+      const catRes = await api.get('/products/categories');
+      setCategories(catRes.data);
+      setFormData({ ...formData, category_id: res.data.id });
+      setIsAddingCategory(false);
+      setNewCategoryName('');
+    } catch (error) {
+      console.error('Failed to create category', error);
+      alert('Failed to create category.');
+    }
   };
 
   const handleProductSubmit = async (e) => {
@@ -285,12 +305,35 @@ export default function SellerDashboard() {
               </div>
               <div>
                 <label className="text-label-md text-on-surface-variant block mb-1">Category</label>
-                <select required value={formData.category_id} onChange={e => setFormData({...formData, category_id: e.target.value})} className="w-full bg-surface-container border border-white/10 rounded-lg p-3 text-on-surface outline-none">
-                  <option value="" disabled>Select a Category</option>
-                  {categories.map(cat => (
-                    <option key={cat.id} value={cat.id}>{cat.name}</option>
-                  ))}
-                </select>
+                <div className="flex gap-2">
+                  <select required={!isAddingCategory} value={formData.category_id} onChange={e => {
+                    if (e.target.value === 'NEW') {
+                      setIsAddingCategory(true);
+                      setFormData({...formData, category_id: ''});
+                    } else {
+                      setFormData({...formData, category_id: e.target.value});
+                    }
+                  }} className="flex-1 bg-surface-container border border-white/10 rounded-lg p-3 text-on-surface outline-none">
+                    <option value="" disabled>Select a Category</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                    <option value="NEW">+ Add New Category</option>
+                  </select>
+                  {isAddingCategory && (
+                    <button type="button" onClick={() => setIsAddingCategory(false)} className="px-3 border border-white/10 rounded-lg text-on-surface-variant hover:text-on-surface">
+                      Cancel
+                    </button>
+                  )}
+                </div>
+                {isAddingCategory && (
+                  <div className="mt-2 flex gap-2">
+                    <input type="text" value={newCategoryName} onChange={e => setNewCategoryName(e.target.value)} className="flex-1 bg-surface-container border border-white/10 rounded-lg p-3 text-on-surface outline-none" placeholder="Enter new category name..." />
+                    <button type="button" onClick={handleAddCategorySubmit} className="bg-secondary text-on-secondary px-4 py-2 rounded-lg font-bold text-sm">
+                      Add
+                    </button>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="text-label-md text-on-surface-variant block mb-1">Image URL</label>

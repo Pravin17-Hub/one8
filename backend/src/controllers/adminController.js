@@ -65,3 +65,36 @@ export const getSystemHealth = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch system health' });
   }
 };
+
+export const getAllAuctions = async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT a.id, a.starting_price, a.current_highest_bid, a.ends_at, a.status,
+             p.title, p.price as original_price, p.id as product_id
+      FROM auctions a
+      JOIN products p ON a.product_id = p.id
+      ORDER BY a.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch all auctions' });
+  }
+};
+
+export const getAllGroupBuys = async (req, res) => {
+  try {
+    const result = await query(`
+      SELECT g.id, g.target_quantity, g.current_quantity, g.discount_price, g.expires_at, g.status,
+             p.title, p.price as original_price, p.id as product_id
+      FROM group_buy_sessions g
+      JOIN products p ON g.product_id = p.id
+      ORDER BY g.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Failed to fetch all group buy sessions' });
+  }
+};
+

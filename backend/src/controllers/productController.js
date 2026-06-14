@@ -260,7 +260,25 @@ export const getProducts = async (req, res) => {
 
 export const getCategories = async (req, res) => {
   try {
-    const result = await query('SELECT * FROM categories ORDER BY name ASC');
+    let result = await query('SELECT * FROM categories ORDER BY name ASC');
+    if (result.rows.length === 0) {
+      const defaultCategories = [
+        'Electronics',
+        'Fashion',
+        'Home & Kitchen',
+        'Beauty & Personal Care',
+        'Groceries',
+        'Books & Stationery',
+        'Sports & Fitness',
+        'Gaming',
+        'Health & Medical',
+        'Toys & Baby Products'
+      ];
+      for (const name of defaultCategories) {
+        await query('INSERT INTO categories (name) VALUES ($1)', [name]);
+      }
+      result = await query('SELECT * FROM categories ORDER BY name ASC');
+    }
     res.json(result.rows);
   } catch (error) {
     console.error(error);

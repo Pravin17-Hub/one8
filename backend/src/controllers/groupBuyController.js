@@ -378,9 +378,13 @@ export const createGroupBuy = async (req, res) => {
     if (!product_id || !target_quantity || !discount_price || !expires_at) {
       return res.status(400).json({ error: 'product_id, target_quantity, discount_price, and expires_at are required' });
     }
+    const expiresDate = new Date(expires_at);
+    if (isNaN(expiresDate.getTime()) || expiresDate <= new Date()) {
+      return res.status(400).json({ error: 'expires_at must be a valid future date' });
+    }
     const result = await query(
       "INSERT INTO group_buy_sessions (product_id, target_quantity, current_quantity, discount_price, expires_at, status) VALUES ($1, $2, 0, $3, $4, 'ACTIVE') RETURNING *",
-      [product_id, target_quantity, discount_price, expires_at]
+      [product_id, target_quantity, discount_price, expiresDate]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {

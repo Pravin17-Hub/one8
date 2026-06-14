@@ -152,9 +152,13 @@ export const createAuction = async (req, res) => {
     if (!product_id || !starting_price || !ends_at) {
       return res.status(400).json({ error: 'product_id, starting_price, and ends_at are required' });
     }
+    const endsDate = new Date(ends_at);
+    if (isNaN(endsDate.getTime()) || endsDate <= new Date()) {
+      return res.status(400).json({ error: 'ends_at must be a valid future date' });
+    }
     const result = await query(
       "INSERT INTO auctions (product_id, starting_price, current_highest_bid, ends_at, status) VALUES ($1, $2, $2, $3, 'ACTIVE') RETURNING *",
-      [product_id, starting_price, ends_at]
+      [product_id, starting_price, endsDate]
     );
     res.status(201).json(result.rows[0]);
   } catch (error) {

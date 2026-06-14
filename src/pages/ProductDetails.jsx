@@ -30,7 +30,7 @@ export default function ProductDetails() {
         
         if (res.data.category_id) {
           const relRes = await api.get(`/products?category_id=${res.data.category_id}&limit=5`);
-          setRelatedProducts(relRes.data.filter(p => p.id !== Number(id)).slice(0, 4));
+          setRelatedProducts(relRes.data.filter(p => p.id !== id).slice(0, 4));
         }
       } catch (error) {
         console.error('Failed to load product details', error);

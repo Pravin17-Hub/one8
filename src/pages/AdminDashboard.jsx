@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 
 export default function AdminDashboard() {
@@ -313,7 +313,11 @@ export default function AdminDashboard() {
               <tbody>
                 {products.map((product) => (
                   <tr key={product.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="p-4 text-body-md text-on-surface font-medium">{product.title}</td>
+                    <td className="p-4 text-body-md text-on-surface font-medium">
+                      <Link to={`/product/${product.id}`} className="hover:text-primary transition-colors hover:underline">
+                        {product.title}
+                      </Link>
+                    </td>
                     <td className="p-4 text-body-md text-on-surface-variant">₹{parseFloat(product.price).toLocaleString()}</td>
                     <td className="p-4 text-body-md text-on-surface-variant">{product.stock_quantity}</td>
                     <td className="p-4">

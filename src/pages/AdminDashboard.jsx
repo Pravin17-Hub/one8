@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
+import { useAuth } from '../context/AuthContext';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('overview');
@@ -31,16 +32,15 @@ export default function AdminDashboard() {
   const [groupBuyForm, setGroupBuyForm] = useState({ product_id: '', target_quantity: '', discount_price: '', expires_at: '' });
   const [isSubmittingGroupBuy, setIsSubmittingGroupBuy] = useState(false);
 
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const userStr = localStorage.getItem('user');
-    if (!userStr) return navigate('/login');
-    const user = JSON.parse(userStr);
+    if (!user) return navigate('/login');
     if (user.role !== 'ADMIN') return navigate('/');
 
     fetchAdminData();
-  }, [navigate]);
+  }, [user, navigate]);
 
   const fetchAdminData = async () => {
     try {

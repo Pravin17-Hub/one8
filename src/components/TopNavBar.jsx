@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useNotifications } from '../context/NotificationContext';
@@ -12,7 +12,10 @@ export default function TopNavBar() {
   const { notifications, markAllAsRead } = useNotifications();
   const [showWishlist, setShowWishlist] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   const unreadCount = notifications.filter(n => n.unread).length;
 
@@ -50,6 +53,15 @@ export default function TopNavBar() {
     >
       <div className="max-w-container-max mx-auto w-full px-margin-mobile md:px-margin-desktop flex items-center justify-between">
         <div className="flex items-center gap-unit-md">
+          {/* Hamburger Menu Icon for Mobile */}
+          <button 
+            onClick={() => { setShowMobileMenu(!showMobileMenu); setShowMobileSearch(false); setShowWishlist(false); setShowNotifications(false); }} 
+            className="lg:hidden p-2 text-on-surface hover:bg-surface-variant/50 rounded-full transition-colors flex items-center justify-center"
+            aria-label="Toggle navigation drawer"
+          >
+            <span className="material-symbols-outlined">{showMobileMenu ? 'close' : 'menu'}</span>
+          </button>
+
           <Link
             to="/"
             className="flex items-center gap-2 font-bold text-on-surface tracking-tight"
@@ -78,6 +90,15 @@ export default function TopNavBar() {
           </form>
         </div>
         <div className="flex items-center gap-unit-sm md:gap-unit-md text-primary dark:text-primary-fixed-dim">
+          {/* Mobile Search Toggle */}
+          <button 
+            onClick={() => { setShowMobileSearch(!showMobileSearch); setShowMobileMenu(false); setShowWishlist(false); setShowNotifications(false); }}
+            className={`p-2 hover:bg-surface-variant/50 rounded-full transition-colors md:hidden flex items-center justify-center ${showMobileSearch ? 'text-primary' : 'text-on-surface'}`}
+            aria-label="Search"
+          >
+            <span className="material-symbols-outlined">{showMobileSearch ? 'close' : 'search'}</span>
+          </button>
+
           {!loading && !isAuthenticated && (
             <div className="flex items-center gap-2 md:gap-4 ml-2">
               <Link
@@ -255,6 +276,108 @@ export default function TopNavBar() {
           )}
         </div>
       </div>
+
+      {/* Mobile Search Bar Collapsible */}
+      {showMobileSearch && (
+        <div className="absolute top-[72px] left-0 w-full bg-surface/95 backdrop-blur-xl border-b border-outline-variant/30 px-margin-mobile py-3 md:hidden z-40 shadow-md animate-fade-in">
+          <form onSubmit={(e) => { handleSearch(e); setShowMobileSearch(false); }} className="relative w-full group">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">
+              search
+            </span>
+            <input
+              className="w-full bg-surface-container-high border border-outline-variant/50 rounded-full py-2 pl-9 pr-4 text-body-md text-on-surface focus:outline-none focus:border-secondary transition-all"
+              placeholder="Search products, brands, or ask AI..."
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoFocus
+            />
+          </form>
+        </div>
+      )}
+
+      {/* Mobile Menu Drawer */}
+      {showMobileMenu && (
+        <div className="fixed inset-0 top-[72px] bg-black/60 backdrop-blur-sm z-40 lg:hidden" onClick={() => setShowMobileMenu(false)}>
+          <div 
+            className="w-72 h-[calc(100vh-72px)] bg-surface-container-low border-r border-white/10 p-6 flex flex-col justify-between shadow-2xl relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-6">
+              <div className="flex items-center gap-3 border-b border-white/10 pb-4">
+                <div className="w-10 h-10 rounded-full bg-surface-container border border-primary flex items-center justify-center shrink-0">
+                  <span className="material-symbols-outlined text-primary">person</span>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-body-md font-bold text-on-surface truncate">
+                    {isAuthenticated ? displayName : 'Guest User'}
+                  </h4>
+                  <p className="text-label-sm text-on-surface-variant uppercase tracking-wider text-[10px]">
+                    {isAuthenticated ? user.role : 'Browse Catalog'}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Link to="/" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/' ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
+                  <span className="material-symbols-outlined">home</span> Home
+                </Link>
+                <Link to="/products" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/products') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
+                  <span className="material-symbols-outlined">grid_view</span> Categories
+                </Link>
+                <Link to="/group-buy" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/group-buy') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
+                  <span className="material-symbols-outlined">group</span> Group Buy
+                </Link>
+                <Link to="/auctions" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/auctions') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
+                  <span className="material-symbols-outlined">gavel</span> Auctions
+                </Link>
+                <Link to="/budget-builder" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/budget-builder') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
+                  <span className="material-symbols-outlined">account_balance_wallet</span> Budget Builder
+                </Link>
+                <Link to="/ai-assistant" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${location.pathname === '/ai-assistant' ? 'bg-primary text-on-primary font-bold shadow-md' : 'bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20'}`}>
+                  <span className="material-symbols-outlined">smart_toy</span> AI Concierge
+                </Link>
+
+                {isAuthenticated && (user.role === 'SELLER' || user.role === 'ADMIN') && (
+                  <Link to="/seller/dashboard" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/seller/dashboard') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-secondary hover:bg-surface-variant/50'}`}>
+                    <span className="material-symbols-outlined">add_business</span> Seller Dashboard
+                  </Link>
+                )}
+                {isAuthenticated && user.role === 'ADMIN' && (
+                  <Link to="/admin/dashboard" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/admin/dashboard') ? 'bg-error/20 text-error font-bold' : 'text-error hover:bg-error/10'}`}>
+                    <span className="material-symbols-outlined">admin_panel_settings</span> Admin Panel
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <div className="border-t border-white/10 pt-4 mt-auto space-y-2">
+              {isAuthenticated ? (
+                <>
+                  <Link to="/profile" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/profile' ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface hover:bg-surface-variant/50'}`}>
+                    <span className="material-symbols-outlined">account_circle</span> View Profile
+                  </Link>
+                  <Link to="/orders" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/orders' ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface hover:bg-surface-variant/50'}`}>
+                    <span className="material-symbols-outlined">receipt_long</span> My Orders
+                  </Link>
+                  <button onClick={() => { handleLogout(); setShowMobileMenu(false); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-error/10 text-error transition-colors text-left font-semibold">
+                    <span className="material-symbols-outlined">logout</span> Log Out
+                  </button>
+                </>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  <Link to="/login" onClick={() => setShowMobileMenu(false)} className="px-4 py-2 text-center rounded-full border border-outline-variant/50 hover:border-primary text-on-surface transition-colors text-sm font-bold">
+                    Sign In
+                  </Link>
+                  <Link to="/register" onClick={() => setShowMobileMenu(false)} className="px-4 py-2 text-center rounded-full bg-primary hover:bg-primary/90 text-on-primary transition-colors text-sm font-bold">
+                    Register
+                  </Link>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 }

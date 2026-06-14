@@ -178,7 +178,7 @@ export default function SellerDashboard() {
         )}
 
         {activeTab === 'products' && (
-          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">

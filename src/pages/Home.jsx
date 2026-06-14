@@ -151,7 +151,7 @@ export default function Home() {
               <span className="material-symbols-outlined animate-spin text-primary text-3xl">autorenew</span>
            </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {smartMatches.map(product => (
               <div 
                 key={product.id} 
@@ -204,7 +204,7 @@ export default function Home() {
               <span className="material-symbols-outlined animate-spin text-primary text-3xl">autorenew</span>
            </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {priceDrops.map((product, idx) => {
               const discountPercent = 20 + (idx * 5); // 20%, 25%, 30%, 35%
               const originalPrice = parseFloat(product.price) / (1 - discountPercent / 100);
@@ -263,7 +263,7 @@ export default function Home() {
               <span className="material-symbols-outlined animate-spin text-primary text-3xl">autorenew</span>
            </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
             {trendingProducts.map(product => (
               <div 
                 key={product.id} 

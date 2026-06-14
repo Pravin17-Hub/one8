@@ -281,7 +281,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'users' && (
-          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'products' && (
-          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">
@@ -374,7 +374,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'auctions' && (
-          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">
@@ -413,7 +413,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'group buys' && (
-          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">
@@ -459,7 +459,7 @@ export default function AdminDashboard() {
         )}
 
         {activeTab === 'orders' && (
-          <div className="glass-card rounded-2xl border border-white/10 overflow-hidden">
+          <div className="glass-card rounded-2xl border border-white/10 overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container-high border-b border-white/10 text-label-md text-on-surface-variant uppercase tracking-wider">

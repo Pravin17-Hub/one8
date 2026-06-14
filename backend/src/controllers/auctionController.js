@@ -1,7 +1,60 @@
 import { query } from '../config/db.js';
 
+const checkAndGenAuctions = async () => {
+  // Auto-complete expired auctions
+  await query(`
+    UPDATE auctions 
+    SET status = 'COMPLETED' 
+    WHERE status = 'ACTIVE' AND ends_at <= CURRENT_TIMESTAMP
+  `);
+
+  // Count active auctions
+  const activeCountRes = await query(`
+    SELECT COUNT(*) FROM auctions 
+    WHERE status = 'ACTIVE' AND ends_at > CURRENT_TIMESTAMP
+  `);
+  const activeCount = parseInt(activeCountRes.rows[0].count);
+
+  if (activeCount < 5) {
+    const needToGenerate = 5 - activeCount;
+    console.log(`Active auctions count is ${activeCount}, generating ${needToGenerate} new ones...`);
+    
+    for (let i = 0; i < needToGenerate; i++) {
+      // Find a random active product that is not currently in an active auction
+      const productRes = await query(`
+        SELECT p.id, p.price, p.title FROM products p
+        WHERE p.status = 'ACTIVE'
+          AND p.id NOT IN (
+            SELECT product_id FROM auctions 
+            WHERE status = 'ACTIVE' AND ends_at > CURRENT_TIMESTAMP
+          )
+        ORDER BY RANDOM()
+        LIMIT 1
+      `);
+
+      if (productRes.rows.length > 0) {
+        const prod = productRes.rows[0];
+        const startingPrice = Math.round(parseFloat(prod.price) * 0.7); // 30% discount start
+        
+        // Stagger end times: 2h, 4h, 6h, 8h, 12h, 24h randomly
+        const hours = [2, 4, 6, 8, 12, 24][Math.floor(Math.random() * 6)];
+        const endsAt = new Date(Date.now() + hours * 60 * 60 * 1000);
+
+        await query(`
+          INSERT INTO auctions (product_id, starting_price, current_highest_bid, ends_at, status)
+          VALUES ($1, $2, $2, $3, 'ACTIVE')
+        `, [prod.id, startingPrice, endsAt]);
+        
+        console.log(`Spawned new auction for product: ${prod.title} (ends in ${hours} hours)`);
+      }
+    }
+  }
+};
+
 export const getActiveAuctions = async (req, res) => {
   try {
+    await checkAndGenAuctions();
+
     const result = await query(`
       SELECT a.id, a.starting_price, a.current_highest_bid, a.ends_at, a.status,
              p.title, p.description, p.id as product_id,

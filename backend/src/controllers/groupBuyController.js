@@ -126,8 +126,61 @@ function parsePriceConstraint(queryStr) {
   return { minPrice, maxPrice };
 }
 
+const checkAndGenGroupBuys = async () => {
+  // Auto-complete expired group buy sessions
+  await query(`
+    UPDATE group_buy_sessions
+    SET status = CASE WHEN current_quantity >= target_quantity THEN 'COMPLETED' ELSE 'FAILED' END
+    WHERE status = 'ACTIVE' AND expires_at <= CURRENT_TIMESTAMP
+  `);
+
+  // Count active group buys
+  const activeCountRes = await query(`
+    SELECT COUNT(*) FROM group_buy_sessions 
+    WHERE status = 'ACTIVE' AND expires_at > CURRENT_TIMESTAMP
+  `);
+  const activeCount = parseInt(activeCountRes.rows[0].count);
+
+  if (activeCount < 5) {
+    const needToGenerate = 5 - activeCount;
+    console.log(`Active group buy sessions count is ${activeCount}, generating ${needToGenerate} new ones...`);
+
+    for (let i = 0; i < needToGenerate; i++) {
+      // Find a random active product that is not currently in an active group buy
+      const productRes = await query(`
+        SELECT p.id, p.price, p.title FROM products p
+        WHERE p.status = 'ACTIVE'
+          AND p.id NOT IN (
+            SELECT product_id FROM group_buy_sessions 
+            WHERE status = 'ACTIVE' AND expires_at > CURRENT_TIMESTAMP
+          )
+        ORDER BY RANDOM()
+        LIMIT 1
+      `);
+
+      if (productRes.rows.length > 0) {
+        const prod = productRes.rows[0];
+        const discountPrice = Math.round(parseFloat(prod.price) * 0.8); // 20% discount
+        const targetQty = Math.floor(Math.random() * 8) + 5; // target between 5 and 12
+
+        // Stagger expiration: 12h, 24h, 48h, 72h
+        const hours = [12, 24, 48, 72][Math.floor(Math.random() * 4)];
+        const expiresAt = new Date(Date.now() + hours * 60 * 60 * 1000);
+
+        await query(`
+          INSERT INTO group_buy_sessions (product_id, target_quantity, current_quantity, discount_price, expires_at, status)
+          VALUES ($1, $2, 0, $3, $4, 'ACTIVE')
+        `, [prod.id, targetQty, discountPrice, expiresAt]);
+
+        console.log(`Spawned new group buy session for product: ${prod.title} (ends in ${hours} hours)`);
+      }
+    }
+  }
+};
+
 export const getActiveSessions = async (req, res) => {
   try {
+    await checkAndGenGroupBuys();
     const { search } = req.query;
 
     const result = await query(`
@@ -181,6 +234,13 @@ export const getActiveSessions = async (req, res) => {
         if (cleanedQueryStr && descLower.includes(cleanedQueryStr)) score += 100;
         if (cleanedQueryStr && catLower.includes(cleanedQueryStr)) score += 150;
         else if (queryWords.length > 0 && queryWords.some(word => catLower.includes(word))) score += 100;
+
+        // Boost if any query word is matched in description
+        queryWords.forEach(qw => {
+          if (descLower.includes(qw)) {
+            score += 150;
+          }
+        });
 
         // 2. Synonym mapping
         expandedQueryWords.forEach(word => {

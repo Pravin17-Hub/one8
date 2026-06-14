@@ -185,6 +185,13 @@ export const getProducts = async (req, res) => {
         if (cleanedQueryStr && descLower.includes(cleanedQueryStr)) score += 100;
         if (cleanedQueryStr && catLower.includes(cleanedQueryStr)) score += 150;
         else if (queryWords.length > 0 && queryWords.some(word => catLower.includes(word))) score += 100;
+
+        // Boost if any query word is matched in description
+        queryWords.forEach(qw => {
+          if (descLower.includes(qw)) {
+            score += 150;
+          }
+        });
         
         // 2. Synonym expansion
         expandedQueryWords.forEach(word => {
@@ -534,6 +541,13 @@ const findCandidatesHelper = async (keyword) => {
       if (cleanedQueryStr && descLower.includes(cleanedQueryStr)) score += 100;
       if (cleanedQueryStr && catLower.includes(cleanedQueryStr)) score += 150;
       else if (queryWords.length > 0 && queryWords.some(word => catLower.includes(word))) score += 100;
+
+      // Boost if any query word is matched in description
+      queryWords.forEach(qw => {
+        if (descLower.includes(qw)) {
+          score += 150;
+        }
+      });
       
       // 2. Synonym expansion
       expandedQueryWords.forEach(word => {

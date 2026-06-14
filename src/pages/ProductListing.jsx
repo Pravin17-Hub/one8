@@ -52,38 +52,26 @@ export default function ProductListing() {
   };
 
   const fetchProducts = async (search = '', categoryId = selectedCategory) => {
-    setLoading(true);
-    try {
-      let endpoint = '/products?';
-      if (search) endpoint += `search=${encodeURIComponent(search)}&`;
-      if (categoryId) endpoint += `category_id=${categoryId}&`;
-      const res = await api.get(endpoint);
+  setLoading(true);
 
-console.log("API RESPONSE", res.data);
-console.log("COUNT", res.data.length);
+  try {
+    let endpoint = '/products?';
 
-setProducts(res.data);
-      const res = await api.get(endpoint);
-      setProducts(res.data);
-    } catch (error) {
-      console.error('Failed to load products', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-const res = await api.get(endpoint);
+    if (search) endpoint += `search=${encodeURIComponent(search)}&`;
+    if (categoryId) endpoint += `category_id=${categoryId}&`;
 
-console.log("Products API response:", res.data);
-console.log("Count:", res.data?.length);
+    const res = await api.get(endpoint);
 
-setProducts(res.data);
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set('search', searchQuery.trim());
-    if (selectedCategory) params.set('category_id', selectedCategory);
-    navigate(`/products?${params.toString()}`);
-  };
+    console.log("COUNT:", res.data.length);
+    console.log("DATA:", res.data);
+
+    setProducts(res.data);
+  } catch (error) {
+    console.error('Failed to load products', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleCategoryClick = (categoryId) => {
     const newCat = selectedCategory === categoryId ? null : categoryId;

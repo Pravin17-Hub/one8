@@ -102,7 +102,7 @@ export default function Checkout() {
 
   const subtotal = cartItems.reduce((sum, item) => sum + (parseFloat(item.price) * item.quantity), 0);
 
-  const payeeUpiId = 'one8store@okaxis'; 
+  const payeeUpiId = '17xyzpravin-1@okaxis'; 
   const payeeName = 'One8 Marketplace';
   const amountVal = subtotal.toFixed(2);
   const upiLink = `upi://pay?pa=${payeeUpiId}&pn=${encodeURIComponent(payeeName)}&am=${amountVal}&cu=INR&tn=${encodeURIComponent('One8 Order')}`;

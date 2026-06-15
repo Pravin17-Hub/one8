@@ -150,7 +150,7 @@ export const getProducts = async (req, res) => {
     
     if (category_id) {
       sql += ` AND pc.category_id = $2`;
-      params.push(category_id);
+      params.push(parseInt(category_id, 10));
     }
     
     const result = await query(sql, params);

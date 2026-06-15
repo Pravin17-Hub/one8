@@ -14,7 +14,7 @@ export default function ProductListing() {
   const [searchParams] = useSearchParams();
   
   const searchParam = searchParams.get('search') || '';
-  const categoryParam = searchParams.get('category_id') || null;
+  const categoryParam = searchParams.get('category_id') ? parseInt(searchParams.get('category_id'), 10) : null;
 
   useEffect(() => {
     fetchCategories();

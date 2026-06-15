@@ -10,6 +10,10 @@ export default function Checkout() {
   const [searchParams] = useSearchParams();
   const orderIdParam = searchParams.get('order_id');
 
+  // Confetti states
+  const [showConfetti, setShowConfetti] = useState(false);
+  const canvasRef = useRef(null);
+
   // Address form states
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -59,6 +63,70 @@ export default function Checkout() {
     fetchData();
   }, [navigate, orderIdParam]);
 
+  useEffect(() => {
+    if (!showConfetti) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    
+    let animationFrameId;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const colors = ['#f59e0b', '#3b82f6', '#10b981', '#ef4444', '#a855f7'];
+    // Generate side-fountain style confetti launchers
+    const particles = Array.from({ length: 180 }).map(() => {
+      const isLeft = Math.random() > 0.5;
+      return {
+        x: isLeft ? 50 : canvas.width - 50,
+        y: canvas.height - 50,
+        vx: isLeft ? Math.random() * 10 + 5 : -Math.random() * 10 - 5,
+        vy: -Math.random() * 18 - 8,
+        size: Math.random() * 8 + 4,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        alpha: 1,
+        decay: Math.random() * 0.012 + 0.006,
+        gravity: 0.26,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 8
+      };
+    });
+
+    const render = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let active = false;
+
+      particles.forEach(p => {
+        if (p.alpha > 0) {
+          active = true;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += p.gravity;
+          p.alpha -= p.decay;
+          p.rotation += p.rotationSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.globalAlpha = Math.max(0, p.alpha);
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.5);
+          ctx.restore();
+        }
+      });
+
+      if (active) {
+        animationFrameId = requestAnimationFrame(render);
+      }
+    };
+
+    render();
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [showConfetti]);
+
   const submitOrder = async (utr) => {
     setProcessing(true);
     setPaymentStep(paymentMethod === 'qr' ? 'Verifying transaction UTR reference...' : 'Verifying shipping address...');
@@ -81,8 +149,15 @@ export default function Checkout() {
                 postalCode
               }
             });
-            alert(`Order Success! Your order ID is: ${res.data.orderId}`);
-            navigate('/orders');
+            
+            // Trigger visual confetti
+            setShowConfetti(true);
+            setPaymentStep('Order Secured! Celebrating success...');
+            
+            setTimeout(() => {
+              alert(`Order Success! Your order ID is: ${res.data.orderId}`);
+              navigate('/orders');
+            }, 3000);
           } catch (error) {
             alert(error.response?.data?.error || 'Checkout failed.');
             console.error(error);
@@ -370,6 +445,13 @@ export default function Checkout() {
           </div>
         </div>
       </div>
+      
+      {showConfetti && (
+        <canvas 
+          ref={canvasRef} 
+          className="fixed inset-0 pointer-events-none z-[9999]"
+        />
+      )}
     </main>
   );
 }

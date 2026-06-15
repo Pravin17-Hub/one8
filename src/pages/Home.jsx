@@ -1,12 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
+import gsap from 'gsap';
+import ThreeDHeroVisualizer from '../components/ThreeDHeroVisualizer';
 
 export default function Home() {
   const [smartMatches, setSmartMatches] = useState([]);
   const [priceDrops, setPriceDrops] = useState([]);
   const [trendingProducts, setTrendingProducts] = useState([]);
   const navigate = useNavigate();
+  const homeRef = useRef(null);
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -16,16 +19,13 @@ export default function Home() {
         const count = allProducts.length;
         
         if (count > 0) {
-          // Smart Matches: sort by match score DESC
           const sortedByMatch = [...allProducts].sort((a, b) => b.ai_match_score - a.ai_match_score);
           setSmartMatches(sortedByMatch.slice(0, Math.min(4, count)));
           
-          // Price Drops: take products from index 4 to 8 (or wrap around)
           const pdStart = count >= 8 ? 4 : 0;
           const pdEnd = count >= 8 ? 8 : Math.min(4, count);
           setPriceDrops(allProducts.slice(pdStart, pdEnd));
           
-          // Trending Now: sort by rating DESC
           const sortedByRating = [...allProducts].sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
           const trStart = count >= 12 ? 8 : 0;
           const trEnd = count >= 12 ? 12 : Math.min(4, count);
@@ -38,8 +38,67 @@ export default function Home() {
     fetchHomeData();
   }, []);
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Intro animations
+      gsap.fromTo('.hero-badge-anim', 
+        { opacity: 0, y: -20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.1 }
+      );
+      gsap.fromTo('.hero-title-anim',
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power4.out', delay: 0.2 }
+      );
+      gsap.fromTo('.hero-desc-anim',
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.4 }
+      );
+      gsap.fromTo('.hero-actions-anim',
+        { opacity: 0, y: 15 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', delay: 0.5 }
+      );
+      gsap.fromTo('.hero-right-anim',
+        { opacity: 0, scale: 0.85 },
+        { opacity: 1, scale: 1, duration: 1.2, ease: 'back.out(1.5)', delay: 0.3 }
+      );
+      gsap.fromTo('.feature-card-anim',
+        { opacity: 0, y: 40 },
+        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out', stagger: 0.15, delay: 0.6 }
+      );
+    }, homeRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  useEffect(() => {
+    if (smartMatches.length > 0) {
+      gsap.fromTo('.smart-match-card',
+        { opacity: 0, y: 35, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 }
+      );
+    }
+  }, [smartMatches]);
+
+  useEffect(() => {
+    if (priceDrops.length > 0) {
+      gsap.fromTo('.price-drop-card',
+        { opacity: 0, y: 35, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 }
+      );
+    }
+  }, [priceDrops]);
+
+  useEffect(() => {
+    if (trendingProducts.length > 0) {
+      gsap.fromTo('.trending-card',
+        { opacity: 0, y: 35, scale: 0.95 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power2.out', stagger: 0.1 }
+      );
+    }
+  }, [trendingProducts]);
+
   return (
-    <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen pb-20">
+    <main ref={homeRef} className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen pb-20">
       {/* Hero Section */}
       <section className="relative overflow-hidden glass-card rounded-3xl p-8 md:p-16 mb-16 border border-white/10 flex flex-col md:flex-row items-center gap-8 group">
         {/* Abstract Background Elements */}
@@ -47,16 +106,16 @@ export default function Home() {
         <div className="absolute bottom-[-50%] right-[-10%] w-96 h-96 bg-tertiary/20 blur-[120px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
 
         <div className="flex-1 relative z-10 text-center md:text-left">
-          <span className="inline-block px-4 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-label-sm font-bold uppercase tracking-widest mb-6">
+          <span className="hero-badge-anim inline-block px-4 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-label-sm font-bold uppercase tracking-widest mb-6">
             The Future of Commerce
           </span>
-          <h1 className="text-display-md md:text-display-lg font-display-md md:font-display-lg text-on-surface mb-6 leading-tight">
+          <h1 className="hero-title-anim text-display-md md:text-display-lg font-display-md md:font-display-lg text-on-surface mb-6 leading-tight">
             Play with Passion, Shop with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Intelligence</span>
           </h1>
-          <p className="text-body-lg text-on-surface-variant mb-8 max-w-xl mx-auto md:mx-0 italic font-light">
+          <p className="hero-desc-anim text-body-lg text-on-surface-variant mb-8 max-w-xl mx-auto md:mx-0 italic font-light">
             "Success isn't just about hard work; it's about making smart choices. One8 AI matches you with the absolute best gear tailored to your budget." <span className="block mt-2 font-bold not-italic text-sm text-primary">— Virat Kohli, Brand Ambassador</span>
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
+          <div className="hero-actions-anim flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
             <button 
               onClick={() => navigate('/ai-assistant')}
               className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-primary/90 text-on-primary font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(255,200,60,0.3)] hover:shadow-[0_0_30px_rgba(255,200,60,0.5)] hover:-translate-y-1"
@@ -73,12 +132,15 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="flex-1 relative z-10 flex justify-center mt-8 md:mt-0">
-           {/* Decorative UI Element representing AI/Marketplace */}
-           <div className="relative w-64 h-64 md:w-80 md:h-80">
-              <div className="absolute inset-0 border-2 border-white/10 rounded-full animate-[spin_20s_linear_infinite]"></div>
-              <div className="absolute inset-4 border border-primary/30 rounded-full animate-[spin_15s_linear_infinite_reverse] border-dashed"></div>
-              <div className="absolute inset-8 rounded-full overflow-hidden bg-surface-container-high flex items-center justify-center shadow-2xl border-2 border-primary/40 backdrop-blur-xl">
+        <div className="flex-1 relative z-10 flex justify-center mt-8 md:mt-0 hero-right-anim">
+           <div className="relative w-72 h-72 md:w-96 md:h-96 flex items-center justify-center">
+              {/* Three.js interactive visualizer */}
+              <div className="absolute inset-0 z-0">
+                 <ThreeDHeroVisualizer />
+              </div>
+              
+              {/* Floating image container */}
+              <div className="absolute w-40 h-40 md:w-52 md:h-52 rounded-full overflow-hidden bg-surface-container-high/40 flex items-center justify-center shadow-2xl border border-primary/20 z-10 hover:scale-110 transition-transform duration-500">
                  <img 
                    src="/one8/virat.jpg" 
                    alt="Virat Kohli" 
@@ -87,10 +149,10 @@ export default function Home() {
               </div>
               
               {/* Floating badges */}
-              <div className="absolute top-0 right-0 glass-card px-4 py-2 rounded-full text-xs font-bold text-primary animate-bounce shadow-lg border border-white/10">
+              <div className="absolute top-4 right-0 glass-card px-4 py-2 rounded-full text-xs font-bold text-primary animate-bounce shadow-lg border border-white/10 z-20">
                  Price Drops
               </div>
-              <div className="absolute bottom-10 left-[-20px] glass-card px-4 py-2 rounded-full text-xs font-bold text-secondary animate-pulse shadow-lg border border-white/10">
+              <div className="absolute bottom-12 left-0 glass-card px-4 py-2 rounded-full text-xs font-bold text-secondary animate-pulse shadow-lg border border-white/10 z-20">
                  Smart Matches
               </div>
            </div>
@@ -156,7 +218,7 @@ export default function Home() {
               <div 
                 key={product.id} 
                 onClick={() => navigate(`/product/${product.id}`)}
-                className="glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
+                className="smart-match-card glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
               >
                 <div className="h-40 bg-surface-container relative overflow-hidden flex items-center justify-center">
                   <div className="absolute top-2 left-2 bg-primary/90 text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm border border-primary/20 z-10">
@@ -212,7 +274,7 @@ export default function Home() {
                 <div 
                   key={product.id} 
                   onClick={() => navigate(`/product/${product.id}`)}
-                  className="glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
+                  className="price-drop-card glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
                 >
                   <div className="h-40 bg-surface-container relative overflow-hidden flex items-center justify-center">
                     <div className="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
@@ -268,7 +330,7 @@ export default function Home() {
               <div 
                 key={product.id} 
                 onClick={() => navigate(`/product/${product.id}`)}
-                className="glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
+                className="trending-card glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col h-full"
               >
                 <div className="h-40 bg-surface-container relative overflow-hidden flex items-center justify-center">
                   <div className="absolute top-2 left-2 bg-[#F59E0B]/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm z-10">
@@ -306,7 +368,7 @@ function FeatureCard({ title, desc, icon, color, bg, border, onClick }) {
   return (
     <div 
       onClick={onClick}
-      className={`glass-card p-6 rounded-3xl border border-white/10 cursor-pointer group transition-all duration-300 ${border} hover:-translate-y-1 relative overflow-hidden`}
+      className={`feature-card-anim glass-card p-6 rounded-3xl border border-white/10 cursor-pointer group transition-all duration-300 ${border} hover:-translate-y-1 relative overflow-hidden`}
     >
       <div className={`absolute -right-10 -top-10 w-40 h-40 rounded-full transition-colors duration-500 blur-2xl ${bg}`}></div>
       <div className="relative z-10">

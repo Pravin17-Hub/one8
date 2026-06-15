@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+import gsap from 'gsap';
 
 export default function ProductListing() {
   const [products, setProducts] = useState([]);
@@ -12,6 +13,7 @@ export default function ProductListing() {
   const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const listingRef = useRef(null);
   
   const searchParam = searchParams.get('search') || '';
   const categoryParam = searchParams.get('category_id') ? parseInt(searchParams.get('category_id'), 10) : null;
@@ -25,6 +27,15 @@ export default function ProductListing() {
     setSelectedCategory(categoryParam);
     fetchProducts(searchParam, categoryParam);
   }, [searchParam, categoryParam]);
+
+  useEffect(() => {
+    if (products.length > 0) {
+      gsap.fromTo('.product-card-anim',
+        { opacity: 0, y: 30, scale: 0.96 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: 'power2.out', stagger: 0.08 }
+      );
+    }
+  }, [products]);
 
   const handleAddToCartDirect = async (productId, e) => {
     e.stopPropagation();
@@ -96,8 +107,8 @@ const handleSearch = (e) => {
   navigate(`/products?${params.toString()}`);
 };
 
-return (
-    <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen flex flex-col">
+  return (
+    <main ref={listingRef} className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen flex flex-col">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <h1 className="text-headline-lg font-headline-lg text-on-surface">Discover Products</h1>
         
@@ -155,7 +166,7 @@ return (
             <div 
               key={product.id} 
               onClick={() => navigate(`/product/${product.id}`)}
-              className="glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col"
+              className="product-card-anim glass-card rounded-2xl overflow-hidden cursor-pointer group hover:border-primary/50 transition-all duration-300 flex flex-col"
             >
               <div className="h-48 bg-surface-container relative overflow-hidden flex items-center justify-center">
                 {product.image_url ? (

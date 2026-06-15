@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import api from '../utils/api';
 import ProductCard from '../components/ProductCard';
+import gsap from 'gsap';
 
 export default function AIShoppingAssistant() {
   const [messages, setMessages] = useState([
@@ -9,6 +10,7 @@ export default function AIShoppingAssistant() {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+  const chatContainerRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -16,6 +18,19 @@ export default function AIShoppingAssistant() {
 
   useEffect(() => {
     scrollToBottom();
+
+    // Trigger elastic pop animation on the newly added bubble
+    const container = chatContainerRef.current;
+    if (container && messages.length > 0) {
+      const bubbles = container.querySelectorAll('.chat-bubble-anim');
+      if (bubbles.length > 0) {
+        const lastBubble = bubbles[bubbles.length - 1];
+        gsap.fromTo(lastBubble,
+          { opacity: 0, scale: 0.8, y: 15 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.45, ease: 'back.out(1.3)' }
+        );
+      }
+    }
   }, [messages]);
 
   const handleSend = async (e) => {
@@ -49,9 +64,9 @@ export default function AIShoppingAssistant() {
 
       <div className="glass-card flex-1 rounded-2xl flex flex-col overflow-hidden border border-white/10 shadow-2xl relative">
         {/* Chat Messages Area */}
-        <div className="flex-1 p-6 overflow-y-auto space-y-6 scrollbar-hide">
+        <div ref={chatContainerRef} className="flex-1 p-6 overflow-y-auto space-y-6 scrollbar-hide">
           {messages.map((msg, index) => (
-            <div key={index} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div key={index} className={`chat-bubble-anim flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] md:max-w-[60%] flex flex-col gap-2 ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
                 
                 {/* Text Bubble */}
@@ -103,7 +118,7 @@ export default function AIShoppingAssistant() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask for recommendations, style advice, or finding deals..." 
-              className="w-full bg-surface-container-low border border-white/10 rounded-full py-4 pl-6 pr-14 text-body-md text-on-surface focus:outline-none focus:border-tertiary focus:ring-1 focus:ring-tertiary/50 transition-all placeholder:text-on-surface-variant/50"
+              className="w-full bg-surface-container-low border border-white/10 rounded-full py-4 pl-6 pr-14 text-body-md text-on-surface focus:outline-none focus:border-tertiary focus:ring-1 focus:ring-tertiary/50 transition-all placeholder:text-on-surface-variant/50 input-glowing"
             />
             <button 
               type="submit" 

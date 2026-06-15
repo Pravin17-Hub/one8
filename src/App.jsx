@@ -26,6 +26,12 @@ import GroupBuyDetails from './pages/GroupBuyDetails';
 import Auctions from './pages/Auctions';
 import AuctionDetails from './pages/AuctionDetails';
 import BudgetBuilder from './pages/BudgetBuilder';
+import AboutUs from './pages/AboutUs';
+import PartnerProgram from './pages/PartnerProgram';
+import ShippingInfo from './pages/ShippingInfo';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+
 
 function App() {
   return (
@@ -91,6 +97,11 @@ function App() {
               <Route path="/auctions/:id" element={<AuctionDetails />} />
               <Route path="/ai-assistant" element={<AIShoppingAssistant />} />
               <Route path="/budget-builder" element={<BudgetBuilder />} />
+              <Route path="/about" element={<AboutUs />} />
+              <Route path="/partner-program" element={<PartnerProgram />} />
+              <Route path="/shipping-info" element={<ShippingInfo />} />
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
 
               <Route
                 path="/seller/dashboard"

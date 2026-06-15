@@ -340,8 +340,33 @@ export default function SellerDashboard() {
                 )}
               </div>
               <div>
-                <label className="text-label-md text-on-surface-variant block mb-1">Image URL</label>
-                <input type="url" required value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-surface-container border border-white/10 rounded-lg p-3 text-on-surface outline-none" placeholder="e.g. https://example.com/product.jpg" />
+                <label className="text-label-md text-on-surface-variant block mb-1">Product Image</label>
+                <div className="flex flex-col gap-2">
+                  <input type="text" required value={formData.image_url} onChange={e => setFormData({...formData, image_url: e.target.value})} className="w-full bg-surface-container border border-white/10 rounded-lg p-3 text-on-surface outline-none text-body-sm" placeholder="e.g. https://example.com/product.jpg or local path" />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                    <span className="text-body-xs text-on-surface-variant shrink-0">Or upload local image:</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData({ ...formData, image_url: reader.result });
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }} 
+                      className="text-body-xs text-on-surface-variant file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 file:cursor-pointer"
+                    />
+                  </div>
+                  {formData.image_url && (
+                    <div className="mt-1 w-20 h-20 rounded-lg overflow-hidden border border-white/10 bg-surface-container flex items-center justify-center">
+                      <img src={formData.image_url} alt="Preview" className="w-full h-full object-contain" />
+                    </div>
+                  )}
+                </div>
               </div>
               {editingProduct && (
                 <div>

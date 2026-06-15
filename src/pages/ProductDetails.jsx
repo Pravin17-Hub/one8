@@ -18,6 +18,7 @@ export default function ProductDetails() {
   const [metrics, setMetrics] = useState({ buyers: 0, comments: 0, rating: 0 });
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     const fetchProduct = async () => {
       try {
         const res = await api.get(`/products/${id}`);

@@ -116,7 +116,7 @@ export default function TopNavBar() {
             </div>
           )}
           {/* Wishlist Icon and Dropdown */}
-          <div className="relative">
+          <div className="relative" onMouseLeave={() => setShowWishlist(false)}>
             <button 
               onClick={() => { setShowWishlist(!showWishlist); setShowNotifications(false); }}
               className={`p-2 hover:bg-surface-variant/50 rounded-full transition-colors relative flex items-center justify-center ${showWishlist ? 'text-primary' : 'text-on-surface'}`}
@@ -183,14 +183,14 @@ export default function TopNavBar() {
 
           <Link
             to="/cart"
-            className="p-2 hover:bg-surface-variant/50 rounded-full transition-colors relative flex items-center justify-center"
+            className="p-2 hover:bg-surface-variant/50 rounded-full transition-colors relative flex items-center justify-center text-on-surface"
           >
             <span className="material-symbols-outlined">shopping_cart</span>
             <span className="absolute top-1 right-1 w-2 h-2 bg-tertiary rounded-full"></span>
           </Link>
 
           {/* Notifications Icon and Dropdown */}
-          <div className="relative">
+          <div className="relative" onMouseLeave={() => setShowNotifications(false)}>
             <button 
               onClick={() => { setShowNotifications(!showNotifications); setShowWishlist(false); }}
               className={`p-2 hover:bg-surface-variant/50 rounded-full transition-colors relative flex items-center justify-center ${showNotifications ? 'text-secondary' : 'text-on-surface'}`}
@@ -242,7 +242,7 @@ export default function TopNavBar() {
             <div className="flex items-center gap-2 ml-2">
               <Link
                 to="/orders"
-                className="hidden md:block p-2 hover:bg-surface-variant/50 rounded-full transition-colors"
+                className="hidden md:block p-2 hover:bg-surface-variant/50 rounded-full transition-colors text-on-surface"
                 title="Orders"
               >
                 <span className="material-symbols-outlined">receipt_long</span>

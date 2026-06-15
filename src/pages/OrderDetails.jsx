@@ -126,7 +126,16 @@ export default function OrderDetails() {
         <div className="space-y-4">
           <div className="glass-card rounded-2xl p-6">
             <h2 className="text-title-md font-semibold text-on-surface mb-4">Total</h2>
-            <p className="text-display-sm font-bold text-primary">₹{parseFloat(order.total_amount).toFixed(2)}</p>
+            <p className="text-display-sm font-bold text-primary mb-4">₹{parseFloat(order.total_amount).toFixed(2)}</p>
+            {order.status === 'PENDING' && order.payment_status === 'PENDING' && (
+              <Link
+                to={`/checkout?order_id=${order.id}`}
+                className="w-full bg-[#10B981] hover:bg-[#059669] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all block text-center shadow-lg shadow-[#10B981]/20"
+              >
+                <span className="material-symbols-outlined text-[20px]">credit_card</span>
+                <span>Proceed to Payment</span>
+              </Link>
+            )}
           </div>
 
           {addr && (

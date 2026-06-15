@@ -341,6 +341,12 @@ export const joinSession = async (req, res) => {
     const { sessionId } = req.params;
     const userId = req.user.id;
 
+    // Check if user is suspended
+    const userRes = await query('SELECT is_suspended, trust_score FROM users WHERE id = $1', [userId]);
+    if (userRes.rows.length > 0 && userRes.rows[0].is_suspended) {
+      return res.status(403).json({ error: `Your account is suspended due to low trust score (${userRes.rows[0].trust_score}).` });
+    }
+
     // 1. Check if session exists and is active
     const sessionRes = await query('SELECT * FROM group_buy_sessions WHERE id = $1 AND status = $2 AND expires_at > CURRENT_TIMESTAMP', [sessionId, 'ACTIVE']);
     if (sessionRes.rows.length === 0) return res.status(404).json({ error: 'Session not found or expired' });

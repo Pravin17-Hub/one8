@@ -12,6 +12,13 @@ class User {
     return result.rows[0];
   }
 
+  static async findByPhone(phone) {
+    const result = await query('SELECT * FROM users WHERE phone = $1', [
+      phone.trim(),
+    ]);
+    return result.rows[0];
+  }
+
   static async findById(id) {
     const result = await query(
       `SELECT ${PUBLIC_FIELDS} FROM users WHERE id = $1`,

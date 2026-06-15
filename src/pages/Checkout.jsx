@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../utils/api';
 
 export default function Checkout() {
@@ -7,6 +7,8 @@ export default function Checkout() {
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const orderIdParam = searchParams.get('order_id');
 
   // Address form states
   const [firstName, setFirstName] = useState('');
@@ -26,22 +28,36 @@ export default function Checkout() {
   const [paymentStep, setPaymentStep] = useState('');
 
   useEffect(() => {
-    const fetchCart = async () => {
+    const fetchData = async () => {
       try {
-        const res = await api.get('/cart');
-        if (res.data.length === 0) {
-          navigate('/cart');
+        if (orderIdParam) {
+          // Fetch specific order details
+          const res = await api.get(`/orders/${orderIdParam}`);
+          const mappedItems = res.data.items.map(item => ({
+            cart_id: item.id,
+            product_id: item.product_id,
+            title: item.title,
+            price: item.price_at_time,
+            quantity: item.quantity
+          }));
+          setCartItems(mappedItems);
         } else {
-          setCartItems(res.data);
+          // Fetch current cart
+          const res = await api.get('/cart');
+          if (res.data.length === 0) {
+            navigate('/cart');
+          } else {
+            setCartItems(res.data);
+          }
         }
       } catch (error) {
-        console.error('Failed to load checkout', error);
+        console.error('Failed to load checkout details', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchCart();
-  }, [navigate]);
+    fetchData();
+  }, [navigate, orderIdParam]);
 
   const submitOrder = async (utr) => {
     setProcessing(true);
@@ -55,7 +71,8 @@ export default function Checkout() {
         
         setTimeout(async () => {
           try {
-            const res = await api.post('/orders/checkout', {
+            const endpoint = orderIdParam ? `/orders/${orderIdParam}/pay` : '/orders/checkout';
+            const res = await api.post(endpoint, {
               shippingAddress: {
                 firstName,
                 lastName,
@@ -116,7 +133,9 @@ export default function Checkout() {
 
   return (
     <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen">
-      <h1 className="text-headline-lg font-headline-lg text-on-surface mb-8">Secure Checkout</h1>
+      <h1 className="text-headline-lg font-headline-lg text-on-surface mb-8">
+        {orderIdParam ? 'Pay Auction Order' : 'Secure Checkout'}
+      </h1>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">

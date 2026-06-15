@@ -6,6 +6,8 @@ import {
   refreshTokenHandler,
   getProfile,
   updateProfile,
+  sendOtp,
+  verifyOtp,
 } from '../controllers/authController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
@@ -15,6 +17,8 @@ router.post('/register', register);
 router.post('/login', login);
 router.post('/logout', logout);
 router.post('/refresh', refreshTokenHandler);
+router.post('/send-otp', sendOtp);
+router.post('/verify-otp', verifyOtp);
 
 router.get('/profile', authenticateToken, getProfile);
 router.get('/me', authenticateToken, getProfile);

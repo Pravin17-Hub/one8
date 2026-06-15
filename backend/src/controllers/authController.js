@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt';
 import User from '../models/User.js';
 import { hashToken } from '../utils/tokenHash.js';
 import { PUBLIC_REGISTER_ROLES, ROLES } from '../constants/roles.js';
+import { query } from '../config/db.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -220,5 +221,94 @@ export const updateProfile = async (req, res) => {
   } catch (error) {
     console.error('Update profile error:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const sendOtp = async (req, res) => {
+  try {
+    const { phone } = req.body;
+    if (!phone || !phone.trim()) {
+      return res.status(400).json({ error: 'Phone number is required' });
+    }
+
+    const trimmedPhone = phone.trim();
+    // Generate 6 digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes TTL
+
+    // Clear old OTPs for this phone
+    await query('DELETE FROM otp_verifications WHERE phone = $1', [trimmedPhone]);
+
+    // Insert new OTP
+    await query('INSERT INTO otp_verifications (phone, code, expires_at) VALUES ($1, $2, $3)', [trimmedPhone, code, expiresAt]);
+
+    // In a real application, call Twilio API here. For now, log and return code.
+    console.log(`[MOCK OTP] Verification code for ${trimmedPhone}: ${code}`);
+
+    const twilioConfigured = !!(process.env.TWILIO_ACCOUNT_SID && process.env.TWILIO_AUTH_TOKEN);
+    res.json({
+      message: 'OTP sent successfully',
+      phone: trimmedPhone,
+      ...(twilioConfigured ? {} : { code }) // Return code for easy frontend testing when mock is active
+    });
+  } catch (error) {
+    console.error('Send OTP error:', error);
+    res.status(500).json({ error: 'Server error sending OTP' });
+  }
+};
+
+export const verifyOtp = async (req, res) => {
+  try {
+    const { phone, code } = req.body;
+    if (!phone || !code) {
+      return res.status(400).json({ error: 'Phone and code are required' });
+    }
+
+    const trimmedPhone = phone.trim();
+    const trimmedCode = code.trim();
+
+    // Verify OTP
+    const otpRes = await query(
+      'SELECT * FROM otp_verifications WHERE phone = $1 AND code = $2 AND expires_at > CURRENT_TIMESTAMP',
+      [trimmedPhone, trimmedCode]
+    );
+
+    if (otpRes.rows.length === 0) {
+      return res.status(400).json({ error: 'Invalid or expired OTP code' });
+    }
+
+    // Delete verification record
+    await query('DELETE FROM otp_verifications WHERE phone = $1', [trimmedPhone]);
+
+    // Check if user exists with this phone
+    let user = await User.findByPhone(trimmedPhone);
+
+    if (!user) {
+      // If user does not exist, auto-register them
+      const defaultEmail = `${trimmedPhone}@one8.com`;
+      const tempPassword = Math.random().toString(36).substring(2, 10);
+      
+      user = await User.create({
+        email: defaultEmail,
+        password: tempPassword,
+        firstName: 'OTP',
+        lastName: 'User',
+        role: 'CUSTOMER'
+      });
+
+      // Update phone field
+      await User.updateProfile(user.id, { phone: trimmedPhone });
+      user = await User.findById(user.id);
+    }
+
+    // Generate tokens and log in
+    const { accessToken, refreshToken } = generateTokens(user);
+    await persistRefreshToken(user.id, refreshToken);
+    setRefreshCookie(res, refreshToken);
+
+    res.json({ user: toPublicUser(user), accessToken });
+  } catch (error) {
+    console.error('Verify OTP error:', error);
+    res.status(500).json({ error: 'Server error verifying OTP' });
   }
 };

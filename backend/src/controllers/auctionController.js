@@ -1,12 +1,19 @@
 import { query } from '../config/db.js';
+import { processAuctionCompletion, checkUnpaidAuctions } from '../utils/auctionHelper.js';
 
 const checkAndGenAuctions = async () => {
   // Auto-complete expired auctions
-  await query(`
-    UPDATE auctions 
-    SET status = 'COMPLETED' 
+  const expiredAuctionsRes = await query(`
+    SELECT id FROM auctions 
     WHERE status = 'ACTIVE' AND ends_at <= CURRENT_TIMESTAMP
   `);
+
+  for (const auction of expiredAuctionsRes.rows) {
+    await processAuctionCompletion(auction.id);
+  }
+
+  // Also check unpaid auction timeouts
+  await checkUnpaidAuctions();
 
   // Count active auctions
   const activeCountRes = await query(`
@@ -119,6 +126,12 @@ export const placeBid = async (req, res) => {
     const { bidAmount } = req.body;
     const userId = req.user.id;
 
+    // Check if user is suspended
+    const userRes = await query('SELECT is_suspended, trust_score FROM users WHERE id = $1', [userId]);
+    if (userRes.rows.length > 0 && userRes.rows[0].is_suspended) {
+      return res.status(403).json({ error: `Your account is suspended due to low trust score (${userRes.rows[0].trust_score}).` });
+    }
+
     // 1. Check if auction is valid
     const auctionRes = await query('SELECT * FROM auctions WHERE id = $1 AND status = $2 AND ends_at > CURRENT_TIMESTAMP', [id, 'ACTIVE']);
     if (auctionRes.rows.length === 0) return res.status(404).json({ error: 'Auction not found or ended' });
@@ -170,11 +183,10 @@ export const createAuction = async (req, res) => {
 export const completeAuction = async (req, res) => {
   try {
     const { id } = req.params;
-    // Standard update status to completed
-    const result = await query(
-      "UPDATE auctions SET status = 'COMPLETED', ends_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
-      [id]
-    );
+    // Call helper to mark complete, generate order, notify winner
+    await processAuctionCompletion(id);
+    
+    const result = await query('SELECT * FROM auctions WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Auction not found' });
     }

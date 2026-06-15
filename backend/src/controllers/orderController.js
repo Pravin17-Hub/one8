@@ -8,6 +8,12 @@ export const checkout = async (req, res) => {
       return res.status(400).json({ error: 'Shipping address is required to place an order.' });
     }
     
+    // Check if user is suspended
+    const userRes = await query('SELECT is_suspended, trust_score FROM users WHERE id = $1', [req.user.id]);
+    if (userRes.rows.length > 0 && userRes.rows[0].is_suspended) {
+      return res.status(403).json({ error: `Your account is suspended due to low trust score (${userRes.rows[0].trust_score}).` });
+    }
+    
     // 1. Fetch user's cart
     const cartRes = await query(`
       SELECT c.product_id, c.quantity, p.price, p.stock_quantity
@@ -137,5 +143,62 @@ export const getOrderById = async (req, res) => {
   } catch (error) {
     console.error('Failed to fetch order details:', error);
     res.status(500).json({ error: 'Failed to fetch order details' });
+  }
+};
+
+export const payOrder = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { shippingAddress } = req.body;
+    
+    if (!shippingAddress || !shippingAddress.addressLine1 || !shippingAddress.city || !shippingAddress.postalCode || !shippingAddress.firstName || !shippingAddress.lastName) {
+      return res.status(400).json({ error: 'Shipping address is required to complete payment.' });
+    }
+
+    // Check if user is suspended
+    const userRes = await query('SELECT is_suspended, trust_score FROM users WHERE id = $1', [req.user.id]);
+    if (userRes.rows.length > 0 && userRes.rows[0].is_suspended) {
+      return res.status(403).json({ error: `Your account is suspended due to low trust score (${userRes.rows[0].trust_score}).` });
+    }
+
+    // Fetch order
+    const orderRes = await query('SELECT * FROM orders WHERE id = $1 AND customer_id = $2', [id, req.user.id]);
+    if (orderRes.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    const order = orderRes.rows[0];
+
+    if (order.payment_status === 'COMPLETED') {
+      return res.status(400).json({ error: 'Order is already paid.' });
+    }
+
+    // Create address
+    const fullName = `${shippingAddress.firstName} ${shippingAddress.lastName}`;
+    const phone = shippingAddress.phone || '0000000000';
+    const addressRes = await query(`
+      INSERT INTO addresses (user_id, full_name, phone, address_line_1, address_line_2, city, state, postal_code, country)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      RETURNING id
+    `, [req.user.id, fullName, phone, shippingAddress.addressLine1, shippingAddress.addressLine2 || '', shippingAddress.city, shippingAddress.state || 'Delhi', shippingAddress.postalCode, shippingAddress.country || 'India']);
+    
+    const addressId = addressRes.rows[0].id;
+
+    // Update order status, address, and stamp created_at to now (re-anchors completion timestamp)
+    await query(`
+      UPDATE orders 
+      SET address_id = $1, status = 'PAID', payment_status = 'COMPLETED', created_at = CURRENT_TIMESTAMP
+      WHERE id = $2
+    `, [addressId, id]);
+
+    // Retrieve items to update stock
+    const itemsRes = await query('SELECT product_id, quantity FROM order_items WHERE order_id = $1', [id]);
+    for (const item of itemsRes.rows) {
+      await query('UPDATE products SET stock_quantity = stock_quantity - $1 WHERE id = $2', [item.quantity, item.product_id]);
+    }
+
+    res.json({ message: 'Payment completed successfully.', orderId: id });
+  } catch (error) {
+    console.error('Pay order error:', error);
+    res.status(500).json({ error: 'Failed to complete payment' });
   }
 };

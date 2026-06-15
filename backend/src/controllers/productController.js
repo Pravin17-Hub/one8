@@ -1,4 +1,11 @@
 import { query } from '../config/db.js';
+import { execFile } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Jaro-Winkler String Similarity Algorithm for fuzzy search spelling correction
 function jaroWinkler(s1, s2) {
@@ -444,6 +451,64 @@ export const deleteProduct = async (req, res) => {
   }
 };
 
+const runCppSolver = (solverPath, budget, items, itemCandidates) => {
+  return new Promise((resolve, reject) => {
+    // Format input stream
+    let inputStr = `${budget}\n${items.length}\n`;
+    for (let i = 0; i < items.length; i++) {
+      const candidates = itemCandidates[i] || [];
+      inputStr += `${candidates.length}\n`;
+      for (let j = 0; j < candidates.length; j++) {
+        const c = candidates[j];
+        const ratingVal = parseFloat(c.rating) || 0;
+        const matchVal = parseInt(c.ai_match_score) || 95;
+        const qualityVal = ratingVal * 10 + matchVal;
+        inputStr += `${j} ${parseFloat(c.price)} ${qualityVal}\n`;
+      }
+    }
+
+    const child = execFile(solverPath, [], (error, stdout, stderr) => {
+      if (error) {
+        return reject(error);
+      }
+      try {
+        const lines = stdout.trim().split('\n').map(l => l.trim()).filter(Boolean);
+        if (lines.length < 2) {
+          return reject(new Error('Invalid solver output'));
+        }
+        
+        const count = parseInt(lines[0]);
+        const combo = [];
+        for (let i = 1; i <= count; i++) {
+          const [itemIdxStr, candidateIdxStr] = lines[i].split(' ');
+          const itemIdx = parseInt(itemIdxStr);
+          const candidateIdx = parseInt(candidateIdxStr);
+          
+          const itemQuery = items[itemIdx];
+          const product = itemCandidates[itemIdx][candidateIdx];
+          combo.push({ itemQuery, product });
+        }
+        
+        const [totalPriceStr, totalQualityStr] = lines[count + 1].split(' ');
+        const total_price = parseFloat(totalPriceStr);
+        const total_quality = parseFloat(totalQualityStr);
+        
+        resolve({
+          total_price,
+          total_quality,
+          matched_count: count,
+          combo
+        });
+      } catch (e) {
+        reject(e);
+      }
+    });
+
+    child.stdin.write(inputStr);
+    child.stdin.end();
+  });
+};
+
 export const getBudgetCombo = async (req, res) => {
   try {
     const { budget, items } = req.body;
@@ -469,8 +534,28 @@ export const getBudgetCombo = async (req, res) => {
       const candidates = await findCandidatesHelper(item);
       itemCandidates.push(candidates);
     }
+
+    // 2. Try native C++ solver first (progressive enhancement)
+    const solverExecutable = process.platform === 'win32' ? 'budget_solver.exe' : 'budget_solver';
+    const solverPath = path.join(__dirname, '..', 'utils', solverExecutable);
+
+    if (fs.existsSync(solverPath)) {
+      try {
+        const result = await runCppSolver(solverPath, parsedBudget, cleanedItems, itemCandidates);
+        return res.json({
+          original_items: cleanedItems,
+          budget: parsedBudget,
+          total_price: result.total_price,
+          total_quality: result.total_quality,
+          matched_count: result.matched_count,
+          combo: result.combo
+        });
+      } catch (err) {
+        console.warn('C++ solver execution failed, falling back to JS solver:', err);
+      }
+    }
     
-    // 2. Backtracking search for the best combination under the budget
+    // 3. Fallback backtracking search for the best combination under the budget in JS
     let bestCombo = [];
     let bestQuality = -1;
     let bestCount = 0;

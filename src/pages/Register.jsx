@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import api from '../utils/api';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -11,8 +12,14 @@ export default function Register() {
     confirmPassword: '',
     role: 'CUSTOMER'
   });
+  
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSentMessage, setOtpSentMessage] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  
   const navigate = useNavigate();
   const { register } = useAuth();
 
@@ -20,16 +27,37 @@ export default function Register() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
+  const handleSendOtp = async () => {
     setError('');
-
+    
     if (formData.password !== formData.confirmPassword) {
       return setError('Passwords do not match');
     }
 
     if (formData.password.length < 8) {
       return setError('Password must be at least 8 characters');
+    }
+
+    setSendingOtp(true);
+    try {
+      const res = await api.post('/auth/send-email-otp', { email: formData.email });
+      setOtpSent(true);
+      if (res.data.code) {
+        setOtpSentMessage(`[Local Mock Code: ${res.data.code}]`);
+      } else {
+        setOtpSentMessage('Please check your email inbox.');
+      }
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to send verification OTP. Please try again.');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleRegister = async () => {
+    setError('');
+    if (!otpCode || otpCode.trim().length !== 6) {
+      return setError('Please enter a valid 6-digit OTP code');
     }
 
     setLoading(true);
@@ -40,7 +68,8 @@ export default function Register() {
         lastName: formData.lastName,
         email: formData.email,
         password: formData.password,
-        accountType: formData.role.toLowerCase()
+        accountType: formData.role.toLowerCase(),
+        otpCode: otpCode.trim()
       });
       
       if (user.role === 'SELLER') {
@@ -49,9 +78,18 @@ export default function Register() {
         navigate('/');
       }
     } catch (err) {
-      setError(err.response?.data?.error || 'Registration failed. Please try again.');
+      setError(err.response?.data?.error || 'Registration failed. Please check your verification code and try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    if (!otpSent) {
+      handleSendOtp();
+    } else {
+      handleRegister();
     }
   };
 
@@ -67,7 +105,7 @@ export default function Register() {
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-4">
+        <form onSubmit={handleFormSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="text-label-md text-on-surface-variant mb-2 block">First Name</label>
@@ -75,9 +113,10 @@ export default function Register() {
                 type="text" 
                 name="firstName"
                 required
+                disabled={otpSent}
                 value={formData.firstName}
                 onChange={handleChange}
-                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all" 
+                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all disabled:opacity-60" 
                 placeholder="John" 
               />
             </div>
@@ -87,9 +126,10 @@ export default function Register() {
                 type="text" 
                 name="lastName"
                 required
+                disabled={otpSent}
                 value={formData.lastName}
                 onChange={handleChange}
-                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all" 
+                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all disabled:opacity-60" 
                 placeholder="Doe" 
               />
             </div>
@@ -101,9 +141,10 @@ export default function Register() {
               type="email" 
               name="email"
               required
+              disabled={otpSent}
               value={formData.email}
               onChange={handleChange}
-              className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all" 
+              className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all disabled:opacity-60" 
               placeholder="name@example.com" 
             />
           </div>
@@ -115,10 +156,11 @@ export default function Register() {
                 type="password" 
                 name="password"
                 required
+                disabled={otpSent}
                 minLength="8"
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all" 
+                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all disabled:opacity-60" 
                 placeholder="••••••••" 
               />
             </div>
@@ -128,10 +170,11 @@ export default function Register() {
                 type="password" 
                 name="confirmPassword"
                 required
+                disabled={otpSent}
                 minLength="8"
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all" 
+                className="w-full bg-surface-container-high border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all disabled:opacity-60" 
                 placeholder="••••••••" 
               />
             </div>
@@ -141,26 +184,67 @@ export default function Register() {
              <label className="text-label-md text-on-surface-variant mb-2 block">I want to...</label>
              <div className="flex gap-4">
                 <label className="flex-1 cursor-pointer">
-                  <input type="radio" name="role" value="CUSTOMER" checked={formData.role === 'CUSTOMER'} onChange={handleChange} className="peer sr-only" />
-                  <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all">
-                    Shop
-                  </div>
+                   <input type="radio" name="role" value="CUSTOMER" disabled={otpSent} checked={formData.role === 'CUSTOMER'} onChange={handleChange} className="peer sr-only" />
+                   <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all peer-disabled:opacity-60">
+                     Shop
+                   </div>
                 </label>
                 <label className="flex-1 cursor-pointer">
-                  <input type="radio" name="role" value="SELLER" checked={formData.role === 'SELLER'} onChange={handleChange} className="peer sr-only" />
-                  <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all">
-                    Sell
-                  </div>
+                   <input type="radio" name="role" value="SELLER" disabled={otpSent} checked={formData.role === 'SELLER'} onChange={handleChange} className="peer sr-only" />
+                   <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all peer-disabled:opacity-60">
+                     Sell
+                   </div>
                 </label>
              </div>
           </div>
 
+          {otpSent && (
+            <div className="bg-secondary/10 border border-secondary/30 rounded-xl p-4 mt-6 text-left">
+              <p className="text-body-sm text-secondary font-bold mb-1">Verify your email address</p>
+              <p className="text-body-xs text-on-surface-variant mb-2">We have sent a 6-digit verification code to <strong className="text-on-surface">{formData.email}</strong>.</p>
+              {otpSentMessage && <p className="text-body-xs text-secondary font-medium mb-3 italic">{otpSentMessage}</p>}
+              
+              <div>
+                <label className="text-label-md text-on-surface-variant mb-2 block">OTP Verification Code</label>
+                <input 
+                  type="text" 
+                  name="otpCode"
+                  required
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  className="w-full bg-surface-container border border-white/10 rounded-lg p-3 text-on-surface focus:border-secondary focus:ring-1 focus:ring-secondary/50 outline-none transition-all text-center tracking-widest text-lg font-bold" 
+                  placeholder="123456" 
+                  maxLength="6"
+                  pattern="\d{6}"
+                />
+              </div>
+              
+              <div className="flex justify-between items-center mt-3">
+                <button 
+                  type="button" 
+                  onClick={handleSendOtp} 
+                  disabled={sendingOtp}
+                  className="text-body-xs text-secondary hover:underline font-semibold"
+                >
+                  {sendingOtp ? 'Resending...' : 'Resend Code'}
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => setOtpSent(false)} 
+                  className="text-body-xs text-on-surface-variant hover:text-on-surface hover:underline font-semibold"
+                >
+                  Change Email / Details
+                </button>
+              </div>
+            </div>
+          )}
+
           <button 
             type="submit" 
-            disabled={loading}
+            disabled={loading || sendingOtp}
             className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-[#261400] font-bold py-3 rounded-lg mt-6 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
           >
-            {loading ? <span className="material-symbols-outlined animate-spin text-xl">autorenew</span> : 'Create Account'}
+            {loading || sendingOtp ? <span className="material-symbols-outlined animate-spin text-xl">autorenew</span> : (otpSent ? 'Verify & Register' : 'Send Verification OTP')}
           </button>
         </form>
 

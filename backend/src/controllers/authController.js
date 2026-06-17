@@ -7,6 +7,9 @@ import { query } from '../config/db.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// In-memory fallback cache for email OTPs
+const emailOtpMemoryCache = new Map();
+
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -65,7 +68,7 @@ const validateRegistration = ({ email, password, firstName, lastName }) => {
 
 export const register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, accountType } = req.body;
+    const { email, password, firstName, lastName, accountType, otpCode } = req.body;
 
     const validationError = validateRegistration({
       email,
@@ -75,6 +78,39 @@ export const register = async (req, res) => {
     });
     if (validationError) {
       return res.status(400).json({ error: validationError });
+    }
+
+    if (!otpCode || !otpCode.trim()) {
+      return res.status(400).json({ error: 'Email verification OTP code is required' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedCode = otpCode.trim();
+
+    let otpValid = false;
+    try {
+      const otpRes = await query(
+        'SELECT * FROM email_otp_verifications WHERE email = $1 AND code = $2 AND expires_at > CURRENT_TIMESTAMP',
+        [trimmedEmail, trimmedCode]
+      );
+      if (otpRes.rows.length > 0) {
+        otpValid = true;
+        await query('DELETE FROM email_otp_verifications WHERE email = $1', [trimmedEmail]);
+      }
+    } catch (dbError) {
+      console.warn('Database error during email OTP verification, using memory cache fallback:', dbError.message);
+    }
+
+    if (!otpValid) {
+      const cached = emailOtpMemoryCache.get(trimmedEmail);
+      if (cached && cached.code === trimmedCode && cached.expiresAt > new Date()) {
+        otpValid = true;
+        emailOtpMemoryCache.delete(trimmedEmail);
+      }
+    }
+
+    if (!otpValid) {
+      return res.status(400).json({ error: 'Invalid or expired email verification code' });
     }
 
     const requestedRole =
@@ -310,5 +346,89 @@ export const verifyOtp = async (req, res) => {
   } catch (error) {
     console.error('Verify OTP error:', error);
     res.status(500).json({ error: 'Server error verifying OTP' });
+  }
+};
+
+export const sendEmailOtp = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email || !email.trim()) {
+      return res.status(400).json({ error: 'Email is required' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      return res.status(400).json({ error: 'Invalid email address' });
+    }
+
+    // Generate 6 digit code
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes TTL
+
+    try {
+      // Clear old OTPs for this email
+      await query('DELETE FROM email_otp_verifications WHERE email = $1', [trimmedEmail]);
+      // Insert new OTP
+      await query('INSERT INTO email_otp_verifications (email, code, expires_at) VALUES ($1, $2, $3)', [trimmedEmail, code, expiresAt]);
+    } catch (dbError) {
+      console.warn('Database error during email OTP insertion, falling back to memory cache:', dbError.message);
+    }
+
+    // Always store in memory cache as fallback
+    emailOtpMemoryCache.set(trimmedEmail, { code, expiresAt });
+
+    console.log(`[MOCK EMAIL OTP] Verification code for ${trimmedEmail}: ${code}`);
+
+    res.json({
+      message: 'Email OTP sent successfully',
+      email: trimmedEmail,
+      code
+    });
+  } catch (error) {
+    console.error('Send email OTP error:', error);
+    res.status(500).json({ error: 'Server error sending email OTP' });
+  }
+};
+
+export const verifyEmailOtp = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) {
+      return res.status(400).json({ error: 'Email and code are required' });
+    }
+
+    const trimmedEmail = email.trim().toLowerCase();
+    const trimmedCode = code.trim();
+
+    let otpValid = false;
+    try {
+      const otpRes = await query(
+        'SELECT * FROM email_otp_verifications WHERE email = $1 AND code = $2 AND expires_at > CURRENT_TIMESTAMP',
+        [trimmedEmail, trimmedCode]
+      );
+      if (otpRes.rows.length > 0) {
+        otpValid = true;
+        await query('DELETE FROM email_otp_verifications WHERE email = $1', [trimmedEmail]);
+      }
+    } catch (dbError) {
+      console.warn('Database error during email OTP verification, using memory cache fallback:', dbError.message);
+    }
+
+    if (!otpValid) {
+      const cached = emailOtpMemoryCache.get(trimmedEmail);
+      if (cached && cached.code === trimmedCode && cached.expiresAt > new Date()) {
+        otpValid = true;
+        emailOtpMemoryCache.delete(trimmedEmail);
+      }
+    }
+
+    if (!otpValid) {
+      return res.status(400).json({ error: 'Invalid or expired email verification code' });
+    }
+
+    res.json({ message: 'Email verified successfully' });
+  } catch (error) {
+    console.error('Verify email OTP error:', error);
+    res.status(500).json({ error: 'Server error verifying email OTP' });
   }
 };

@@ -17,8 +17,8 @@ const transporter = isConfigured
       port: parseInt(process.env.EMAIL_PORT || '587', 10),
       secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user: process.env.EMAIL_USER ? process.env.EMAIL_USER.trim() : '',
+        pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim() : '',
       },
       connectionTimeout: 5000, // 5 seconds connection timeout
       socketTimeout: 5000,     // 5 seconds socket inactivity timeout

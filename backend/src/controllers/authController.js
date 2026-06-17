@@ -4,6 +4,7 @@ import User from '../models/User.js';
 import { hashToken } from '../utils/tokenHash.js';
 import { PUBLIC_REGISTER_ROLES, ROLES } from '../constants/roles.js';
 import { query } from '../config/db.js';
+import { sendOtpEmail } from '../utils/mailer.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -379,10 +380,12 @@ export const sendEmailOtp = async (req, res) => {
 
     console.log(`[MOCK EMAIL OTP] Verification code for ${trimmedEmail}: ${code}`);
 
+    const emailSent = await sendOtpEmail(trimmedEmail, code);
+
     res.json({
       message: 'Email OTP sent successfully',
       email: trimmedEmail,
-      code
+      ...(emailSent ? {} : { code }) // Return code ONLY if email was NOT sent successfully (mock/fallback/local test mode)
     });
   } catch (error) {
     console.error('Send email OTP error:', error);

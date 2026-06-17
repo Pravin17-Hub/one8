@@ -4,7 +4,7 @@ import User from '../models/User.js';
 import { hashToken } from '../utils/tokenHash.js';
 import { PUBLIC_REGISTER_ROLES, ROLES } from '../constants/roles.js';
 import { query } from '../config/db.js';
-import { sendOtpEmail } from '../utils/mailer.js';
+import { sendOtpEmail, isConfigured } from '../utils/mailer.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -378,15 +378,24 @@ export const sendEmailOtp = async (req, res) => {
     // Always store in memory cache as fallback
     emailOtpMemoryCache.set(trimmedEmail, { code, expiresAt });
 
-    console.log(`[MOCK EMAIL OTP] Verification code for ${trimmedEmail}: ${code}`);
+    if (isConfigured) {
+      // Fire-and-forget email sending so the user does not experience any API delay
+      sendOtpEmail(trimmedEmail, code).catch(err => {
+        console.error(`[SMTP Async Error] Failed to send email to ${trimmedEmail}:`, err);
+      });
 
-    const emailSent = await sendOtpEmail(trimmedEmail, code);
-
-    res.json({
-      message: 'Email OTP sent successfully',
-      email: trimmedEmail,
-      ...(emailSent ? {} : { code }) // Return code ONLY if email was NOT sent successfully (mock/fallback/local test mode)
-    });
+      res.json({
+        message: 'Email OTP sent successfully',
+        email: trimmedEmail
+      });
+    } else {
+      console.log(`[MOCK EMAIL OTP] Verification code for ${trimmedEmail}: ${code}`);
+      res.json({
+        message: 'Email OTP sent successfully',
+        email: trimmedEmail,
+        code
+      });
+    }
   } catch (error) {
     console.error('Send email OTP error:', error);
     res.status(500).json({ error: 'Server error sending email OTP' });

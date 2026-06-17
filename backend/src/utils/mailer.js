@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const isConfigured = !!(
+export const isConfigured = !!(
   process.env.EMAIL_HOST &&
   process.env.EMAIL_USER &&
   process.env.EMAIL_PASS &&
@@ -13,6 +13,7 @@ const isConfigured = !!(
 
 const transporter = isConfigured
   ? nodemailer.createTransport({
+      pool: true, // Use connection pooling to speed up delivery
       host: process.env.EMAIL_HOST,
       port: parseInt(process.env.EMAIL_PORT || '587', 10),
       secure: process.env.EMAIL_PORT === '465', // true for 465, false for other ports

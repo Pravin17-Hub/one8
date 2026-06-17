@@ -6,7 +6,9 @@ dotenv.config();
 const isConfigured = !!(
   process.env.EMAIL_HOST &&
   process.env.EMAIL_USER &&
-  process.env.EMAIL_PASS
+  process.env.EMAIL_PASS &&
+  !process.env.EMAIL_USER.includes('your_gmail_address') &&
+  !process.env.EMAIL_PASS.includes('your_gmail_app_password')
 );
 
 const transporter = isConfigured
@@ -18,6 +20,8 @@ const transporter = isConfigured
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
       },
+      connectionTimeout: 5000, // 5 seconds connection timeout
+      socketTimeout: 5000,     // 5 seconds socket inactivity timeout
     })
   : null;
 

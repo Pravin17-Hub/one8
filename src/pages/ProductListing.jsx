@@ -126,22 +126,26 @@ const handleSearch = (e) => {
       </div>
 
       {categories.length > 0 && (
-        <div className="flex gap-3 overflow-x-auto pb-4 mb-6 hide-scrollbar">
-          <button
-            onClick={() => handleCategoryClick(null)}
-            className={`px-4 py-2 rounded-full whitespace-nowrap font-bold transition-colors text-sm ${selectedCategory === null ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:border-outline-variant/60'}`}
-          >
-            All Products
-          </button>
-          {categories.map(c => (
+        <div className="relative mb-6">
+          <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide scroll-smooth -mx-margin-mobile px-margin-mobile sm:mx-0 sm:px-0">
             <button
-              key={c.id}
-              onClick={() => handleCategoryClick(c.id)}
-              className={`px-4 py-2 rounded-full whitespace-nowrap font-bold transition-colors text-sm ${selectedCategory === c.id ? 'bg-primary text-on-primary' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:border-outline-variant/60'}`}
+              onClick={() => handleCategoryClick(null)}
+              className={`px-4.5 py-2 rounded-full whitespace-nowrap font-bold transition-all text-sm shadow-sm ${selectedCategory === null ? 'bg-primary text-on-primary scale-102' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:border-outline-variant/60'}`}
             >
-              {c.name}
+              All Products
             </button>
-          ))}
+            {categories.map(c => (
+              <button
+                key={c.id}
+                onClick={() => handleCategoryClick(c.id)}
+                className={`px-4.5 py-2 rounded-full whitespace-nowrap font-bold transition-all text-sm shadow-sm ${selectedCategory === c.id ? 'bg-primary text-on-primary scale-102' : 'bg-surface-container-high text-on-surface-variant border border-outline-variant/30 hover:border-outline-variant/60'}`}
+              >
+                {c.name}
+              </button>
+            ))}
+          </div>
+          {/* Subtle fade out gradient on the right to indicate more categories are scrollable */}
+          <div className="absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-background to-transparent pointer-events-none z-10 sm:hidden"></div>
         </div>
       )}
 

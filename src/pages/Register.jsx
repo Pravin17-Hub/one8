@@ -109,7 +109,7 @@ export default function Register() {
         )}
 
         <form onSubmit={handleFormSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-label-md text-on-surface-variant mb-2 block">{t('firstName')}</label>
               <input 
@@ -152,7 +152,7 @@ export default function Register() {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-label-md text-on-surface-variant mb-2 block">{t('password')}</label>
               <input 
@@ -212,6 +212,8 @@ export default function Register() {
                 <input 
                   type="text" 
                   name="otpCode"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
                   required
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}

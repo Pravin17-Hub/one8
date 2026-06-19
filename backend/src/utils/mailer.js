@@ -21,6 +21,7 @@ const transporter = isConfigured
         user: process.env.EMAIL_USER ? process.env.EMAIL_USER.trim() : '',
         pass: process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim() : '',
       },
+      family: 4, // Force IPv4 resolution to prevent ENETUNREACH IPv6 issues on Render
       connectionTimeout: 5000, // 5 seconds connection timeout
       socketTimeout: 5000,     // 5 seconds socket inactivity timeout
     })

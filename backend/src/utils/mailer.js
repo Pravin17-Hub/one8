@@ -5,7 +5,7 @@ dotenv.config();
 export const isConfigured = !!(
   (process.env.BREVO_API_KEY && !process.env.BREVO_API_KEY.includes('your_brevo_api_key')) ||
   (process.env.RESEND_API_KEY && !process.env.RESEND_API_KEY.includes('your_resend_api_key'))
-);
+) && process.env.BYPASS_EMAIL_OTP !== 'true';
 
 export const sendOtpEmail = async (toEmail, code) => {
   const brevoApiKey = process.env.BREVO_API_KEY;

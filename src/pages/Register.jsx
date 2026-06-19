@@ -45,7 +45,8 @@ export default function Register() {
       const res = await api.post('/auth/send-email-otp', { email: formData.email });
       setOtpSent(true);
       if (res.data.code) {
-        setOtpSentMessage(`[Local Mock Code: ${res.data.code}]`);
+        setOtpSentMessage(`[Mock Verification Code: ${res.data.code}]`);
+        setOtpCode(res.data.code);
       } else {
         setOtpSentMessage(t('checkInbox', 'Please check your email inbox.'));
       }

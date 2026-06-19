@@ -110,6 +110,10 @@ export const register = async (req, res) => {
       }
     }
 
+    if (process.env.BYPASS_EMAIL_OTP === 'true') {
+      otpValid = true;
+    }
+
     if (!otpValid) {
       return res.status(400).json({ error: 'Invalid or expired email verification code' });
     }

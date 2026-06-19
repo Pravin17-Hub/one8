@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ export default function Register() {
   
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { t } = useLanguage();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -45,7 +47,7 @@ export default function Register() {
       if (res.data.code) {
         setOtpSentMessage(`[Local Mock Code: ${res.data.code}]`);
       } else {
-        setOtpSentMessage('Please check your email inbox.');
+        setOtpSentMessage(t('checkInbox', 'Please check your email inbox.'));
       }
     } catch (err) {
       setError(err.response?.data?.error || 'Failed to send verification OTP. Please try again.');
@@ -96,8 +98,8 @@ export default function Register() {
   return (
     <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen flex items-center justify-center py-10">
       <div className="glass-card w-full max-w-lg p-8 rounded-2xl border border-white/10 shadow-2xl">
-        <h1 className="text-headline-lg font-headline-lg text-on-surface mb-2">Create Account</h1>
-        <p className="text-body-md text-on-surface-variant mb-8">Join One8 Marketplace to discover and sell premium goods</p>
+        <h1 className="text-headline-lg font-headline-lg text-on-surface mb-2">{t('createAccount')}</h1>
+        <p className="text-body-md text-on-surface-variant mb-8">{t('joinMarketplace')}</p>
         
         {error && (
           <div className="bg-error/20 border border-error/50 text-error px-4 py-3 rounded-lg mb-6 text-sm">
@@ -108,7 +110,7 @@ export default function Register() {
         <form onSubmit={handleFormSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-label-md text-on-surface-variant mb-2 block">First Name</label>
+              <label className="text-label-md text-on-surface-variant mb-2 block">{t('firstName')}</label>
               <input 
                 type="text" 
                 name="firstName"
@@ -121,7 +123,7 @@ export default function Register() {
               />
             </div>
             <div>
-              <label className="text-label-md text-on-surface-variant mb-2 block">Last Name</label>
+              <label className="text-label-md text-on-surface-variant mb-2 block">{t('lastName')}</label>
               <input 
                 type="text" 
                 name="lastName"
@@ -136,7 +138,7 @@ export default function Register() {
           </div>
           
           <div>
-            <label className="text-label-md text-on-surface-variant mb-2 block">Email Address</label>
+            <label className="text-label-md text-on-surface-variant mb-2 block">{t('email')}</label>
             <input 
               type="email" 
               name="email"
@@ -151,7 +153,7 @@ export default function Register() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="text-label-md text-on-surface-variant mb-2 block">Password</label>
+              <label className="text-label-md text-on-surface-variant mb-2 block">{t('password')}</label>
               <input 
                 type="password" 
                 name="password"
@@ -165,7 +167,7 @@ export default function Register() {
               />
             </div>
             <div>
-              <label className="text-label-md text-on-surface-variant mb-2 block">Confirm Password</label>
+              <label className="text-label-md text-on-surface-variant mb-2 block">{t('confirmPassword')}</label>
               <input 
                 type="password" 
                 name="confirmPassword"
@@ -181,31 +183,31 @@ export default function Register() {
           </div>
 
           <div>
-             <label className="text-label-md text-on-surface-variant mb-2 block">I want to...</label>
+             <label className="text-label-md text-on-surface-variant mb-2 block">{t('wantTo')}</label>
              <div className="flex gap-4">
-                <label className="flex-1 cursor-pointer">
-                   <input type="radio" name="role" value="CUSTOMER" disabled={otpSent} checked={formData.role === 'CUSTOMER'} onChange={handleChange} className="peer sr-only" />
-                   <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all peer-disabled:opacity-60">
-                     Shop
-                   </div>
-                </label>
-                <label className="flex-1 cursor-pointer">
-                   <input type="radio" name="role" value="SELLER" disabled={otpSent} checked={formData.role === 'SELLER'} onChange={handleChange} className="peer sr-only" />
-                   <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all peer-disabled:opacity-60">
-                     Sell
-                   </div>
-                </label>
+                 <label className="flex-1 cursor-pointer">
+                    <input type="radio" name="role" value="CUSTOMER" disabled={otpSent} checked={formData.role === 'CUSTOMER'} onChange={handleChange} className="peer sr-only" />
+                    <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all peer-disabled:opacity-60">
+                      {t('shop')}
+                    </div>
+                 </label>
+                 <label className="flex-1 cursor-pointer">
+                    <input type="radio" name="role" value="SELLER" disabled={otpSent} checked={formData.role === 'SELLER'} onChange={handleChange} className="peer sr-only" />
+                    <div className="text-center py-3 rounded-lg border border-white/10 text-on-surface-variant peer-checked:border-secondary peer-checked:text-secondary peer-checked:bg-secondary/10 transition-all peer-disabled:opacity-60">
+                      {t('sell')}
+                    </div>
+                 </label>
              </div>
           </div>
 
           {otpSent && (
             <div className="bg-secondary/10 border border-secondary/30 rounded-xl p-4 mt-6 text-left">
-              <p className="text-body-sm text-secondary font-bold mb-1">Verify your email address</p>
-              <p className="text-body-xs text-on-surface-variant mb-2">We have sent a 6-digit verification code to <strong className="text-on-surface">{formData.email}</strong>.</p>
+              <p className="text-body-sm text-secondary font-bold mb-1">{t('verifyEmail')}</p>
+              <p className="text-body-xs text-on-surface-variant mb-2">{t('otpSentText')} <strong className="text-on-surface">{formData.email}</strong>.</p>
               {otpSentMessage && <p className="text-body-xs text-secondary font-medium mb-3 italic">{otpSentMessage}</p>}
               
               <div>
-                <label className="text-label-md text-on-surface-variant mb-2 block">OTP Verification Code</label>
+                <label className="text-label-md text-on-surface-variant mb-2 block">{t('otpVerificationCode')}</label>
                 <input 
                   type="text" 
                   name="otpCode"
@@ -226,14 +228,14 @@ export default function Register() {
                   disabled={sendingOtp}
                   className="text-body-xs text-secondary hover:underline font-semibold"
                 >
-                  {sendingOtp ? 'Resending...' : 'Resend Code'}
+                  {sendingOtp ? t('resending') : t('resendCode')}
                 </button>
                 <button 
                   type="button" 
                   onClick={() => setOtpSent(false)} 
                   className="text-body-xs text-on-surface-variant hover:text-on-surface hover:underline font-semibold"
                 >
-                  Change Email / Details
+                  {t('changeEmail')}
                 </button>
               </div>
             </div>
@@ -244,12 +246,12 @@ export default function Register() {
             disabled={loading || sendingOtp}
             className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-[#261400] font-bold py-3 rounded-lg mt-6 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
           >
-            {loading || sendingOtp ? <span className="material-symbols-outlined animate-spin text-xl">autorenew</span> : (otpSent ? 'Verify & Register' : 'Send Verification OTP')}
+            {loading || sendingOtp ? <span className="material-symbols-outlined animate-spin text-xl">autorenew</span> : (otpSent ? t('verifyAndRegister') : t('sendVerificationOtp'))}
           </button>
         </form>
 
         <p className="text-center text-body-md text-on-surface-variant mt-6">
-          Already have an account? <Link to="/login" className="text-secondary font-semibold hover:underline">Sign in</Link>
+          {t('alreadyHaveAccount')} <Link to="/login" className="text-secondary font-semibold hover:underline">{t('login')}</Link>
         </p>
       </div>
     </main>

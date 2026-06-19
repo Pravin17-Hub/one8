@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +10,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t } = useLanguage();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -33,14 +35,22 @@ export default function Login() {
     }
   };
 
+  const portalText = t('unifiedPortal');
+  const colonIndex = portalText.indexOf(':');
+  const boldPrefix = colonIndex !== -1 ? portalText.substring(0, colonIndex + 1) : '';
+  const mainText = colonIndex !== -1 ? portalText.substring(colonIndex + 1) : portalText;
+
   return (
     <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen flex items-center justify-center">
       <div className="glass-card w-full max-w-md p-8 rounded-2xl border border-white/10 shadow-2xl">
-        <h1 className="text-headline-lg font-headline-lg text-on-surface mb-2">Welcome Back</h1>
-        <p className="text-body-md text-on-surface-variant mb-1">Sign in to continue to One8 Marketplace</p>
+        <h1 className="text-headline-lg font-headline-lg text-on-surface mb-2">{t('welcomeBack')}</h1>
+        <p className="text-body-md text-on-surface-variant mb-4">{t('signInDesc')}</p>
         <div className="bg-secondary/10 border border-secondary/20 text-secondary text-xs px-3 py-2 rounded-lg mb-8 inline-flex items-center gap-2">
           <span className="material-symbols-outlined text-sm">switch_account</span>
-          <strong>Unified Portal:</strong> We automatically log you in as a Buyer or Seller based on your account.
+          <span>
+            {boldPrefix && <strong>{boldPrefix}</strong>}
+            {mainText}
+          </span>
         </div>
         
         {error && (
@@ -51,7 +61,7 @@ export default function Login() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="text-label-md text-on-surface-variant mb-2 block">Email Address</label>
+            <label className="text-label-md text-on-surface-variant mb-2 block">{t('email')}</label>
             <input 
               type="email" 
               required
@@ -63,8 +73,8 @@ export default function Login() {
           </div>
           <div>
             <div className="flex justify-between mb-2">
-              <label className="text-label-md text-on-surface-variant block">Password</label>
-              <a href="#" className="text-label-md text-secondary hover:underline">Forgot password?</a>
+              <label className="text-label-md text-on-surface-variant block">{t('password')}</label>
+              <a href="#" className="text-label-md text-secondary hover:underline">{t('forgotPassword')}</a>
             </div>
             <input 
               type="password" 
@@ -80,12 +90,12 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-[#F59E0B] hover:bg-[#D97706] text-[#261400] font-bold py-3 rounded-lg mt-6 transition-colors shadow-sm disabled:opacity-50 flex justify-center items-center"
           >
-            {loading ? <span className="material-symbols-outlined animate-spin text-xl">autorenew</span> : 'Sign In'}
+            {loading ? <span className="material-symbols-outlined animate-spin text-xl">autorenew</span> : t('login')}
           </button>
         </form>
 
         <p className="text-center text-body-md text-on-surface-variant mt-6">
-          Don't have an account? <Link to="/register" className="text-secondary font-semibold hover:underline">Sign up</Link>
+          {t('dontHaveAccount')} <Link to="/register" className="text-secondary font-semibold hover:underline">{t('signUp')}</Link>
         </p>
       </div>
     </main>

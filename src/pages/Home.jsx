@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../utils/api';
 import gsap from 'gsap';
 import ThreeDHeroVisualizer from '../components/ThreeDHeroVisualizer';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Home() {
   const [smartMatches, setSmartMatches] = useState([]);
@@ -10,6 +11,7 @@ export default function Home() {
   const [trendingProducts, setTrendingProducts] = useState([]);
   const navigate = useNavigate();
   const homeRef = useRef(null);
+  const { language, t } = useLanguage();
 
   useEffect(() => {
     const fetchHomeData = async () => {
@@ -107,13 +109,23 @@ export default function Home() {
 
         <div className="flex-1 relative z-10 text-center md:text-left">
           <span className="hero-badge-anim inline-block px-4 py-1 rounded-full border border-primary/30 bg-primary/10 text-primary text-label-sm font-bold uppercase tracking-widest mb-6">
-            The Future of Commerce
+            {t('theFutureOfCommerce')}
           </span>
           <h1 className="hero-title-anim text-display-md md:text-display-lg font-display-md md:font-display-lg text-on-surface mb-6 leading-tight">
-            Play with Passion, Shop with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Intelligence</span>
+            {language === 'en' ? (
+              <>Play with Passion, Shop with <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Intelligence</span></>
+            ) : language === 'ta' ? (
+              <>ஆர்வத்துடன் விளையாடுங்கள், புத்திசாலித்தனத்துடன் <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">ஷாப்பிங் செய்யுங்கள்</span></>
+            ) : language === 'hi' ? (
+              <>जुनून के साथ खेलें, <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">समझदारी से खरीदारी करें</span></>
+            ) : language === 'es' ? (
+              <>Juega con Pasión, Compra con <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Inteligencia</span></>
+            ) : (
+              <>Jouez avec Passion, Achetez avec <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-tertiary">Intelligence</span></>
+            )}
           </h1>
           <p className="hero-desc-anim text-body-lg text-on-surface-variant mb-8 max-w-xl mx-auto md:mx-0 italic font-light">
-            "Success isn't just about hard work; it's about making smart choices. One8 AI matches you with the absolute best gear tailored to your budget." <span className="block mt-2 font-bold not-italic text-sm text-primary">— Virat Kohli, Brand Ambassador</span>
+            {t('heroSubtitle')} <span className="block mt-2 font-bold not-italic text-sm text-primary">{t('brandAmbassador')}</span>
           </p>
           <div className="hero-actions-anim flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4">
             <button 
@@ -121,13 +133,13 @@ export default function Home() {
               className="w-full sm:w-auto px-8 py-4 bg-primary hover:bg-primary/90 text-on-primary font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(255,200,60,0.3)] hover:shadow-[0_0_30px_rgba(255,200,60,0.5)] hover:-translate-y-1"
             >
               <span className="material-symbols-outlined">psychology</span>
-              Ask AI Assistant
+              {t('askAiAssistant')}
             </button>
             <button 
               onClick={() => navigate('/products')}
               className="w-full sm:w-auto px-8 py-4 bg-surface-container-high hover:bg-white/10 text-on-surface font-bold rounded-xl border border-white/10 transition-all hover:-translate-y-1"
             >
-              Browse Catalog
+              {t('browseCatalog')}
             </button>
           </div>
         </div>
@@ -150,10 +162,10 @@ export default function Home() {
               
               {/* Floating badges */}
               <div className="absolute top-4 right-0 glass-card px-4 py-2 rounded-full text-xs font-bold text-primary animate-bounce shadow-lg border border-white/10 z-20">
-                 Price Drops
+                 {t('priceDrops')}
               </div>
               <div className="absolute bottom-12 left-0 glass-card px-4 py-2 rounded-full text-xs font-bold text-secondary animate-pulse shadow-lg border border-white/10 z-20">
-                 Smart Matches
+                 {t('aiSmartMatches')}
               </div>
            </div>
         </div>
@@ -162,13 +174,13 @@ export default function Home() {
       {/* Feature Highlights Grid */}
       <section className="mb-20">
         <div className="flex items-center justify-between mb-8">
-           <h2 className="text-headline-md font-headline-md text-on-surface">Explore Modes</h2>
+           <h2 className="text-headline-md font-headline-md text-on-surface">{t('exploreModes')}</h2>
         </div>
         
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           <FeatureCard 
-            title="Group Buy" 
-            desc="Team up with friends or the community to unlock massive wholesale discounts."
+            title={t('groupBuy')} 
+            desc={t('groupBuyDesc')}
             icon="groups"
             color="text-secondary"
             bg="group-hover:bg-secondary/10"
@@ -176,8 +188,8 @@ export default function Home() {
             onClick={() => navigate('/group-buy')}
           />
           <FeatureCard 
-            title="Live Auctions" 
-            desc="Bid in real-time on exclusive, rare, and limited-edition items."
+            title={t('liveAuctions')} 
+            desc={t('liveAuctionsDesc')}
             icon="gavel"
             color="text-tertiary"
             bg="group-hover:bg-tertiary/10"
@@ -185,8 +197,8 @@ export default function Home() {
             onClick={() => navigate('/auctions')}
           />
           <FeatureCard 
-            title="Budget Builder" 
-            desc="Input your budget and shopping items, and let AI build the best product combination."
+            title={t('budgetBuilder')} 
+            desc={t('budgetBuilderDesc')}
             icon="account_balance_wallet"
             color="text-primary"
             bg="group-hover:bg-primary/10"
@@ -201,10 +213,10 @@ export default function Home() {
         <div className="flex items-center justify-between mb-8">
            <h2 className="text-headline-md font-headline-md text-on-surface flex items-center gap-2">
              <span className="material-symbols-outlined text-primary">psychology</span>
-             AI Smart Matches
+             {t('aiSmartMatches')}
            </h2>
            <button onClick={() => navigate('/products')} className="text-primary font-bold hover:underline flex items-center gap-1 text-sm uppercase tracking-wider">
-             View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+             {t('viewAll')} <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
            </button>
         </div>
 
@@ -223,7 +235,7 @@ export default function Home() {
                 <div className="h-40 bg-surface-container relative overflow-hidden flex items-center justify-center">
                   <div className="absolute top-2 left-2 bg-primary/90 text-on-primary text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-0.5 shadow-sm border border-primary/20 z-10">
                     <span className="material-symbols-outlined text-[12px]">psychology</span>
-                    {product.ai_match_score || 95}% Match
+                    {product.ai_match_score || 95}% {t('match')}
                   </div>
                   {product.image_url ? (
                     <img src={product.image_url} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
@@ -254,10 +266,10 @@ export default function Home() {
         <div className="flex items-center justify-between mb-8">
            <h2 className="text-headline-md font-headline-md text-on-surface flex items-center gap-2">
              <span className="material-symbols-outlined text-error">sell</span>
-             Price Drops
+             {t('priceDrops')}
            </h2>
            <button onClick={() => navigate('/products')} className="text-primary font-bold hover:underline flex items-center gap-1 text-sm uppercase tracking-wider">
-             View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+             {t('viewAll')} <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
            </button>
         </div>
 
@@ -278,7 +290,7 @@ export default function Home() {
                 >
                   <div className="h-40 bg-surface-container relative overflow-hidden flex items-center justify-center">
                     <div className="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
-                      SAVE {discountPercent}%
+                      {t('save')} {discountPercent}%
                     </div>
                     {product.image_url ? (
                       <img src={product.image_url} alt={product.title} className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500" />
@@ -313,10 +325,10 @@ export default function Home() {
         <div className="flex items-center justify-between mb-8">
            <h2 className="text-headline-md font-headline-md text-on-surface flex items-center gap-2">
              <span className="material-symbols-outlined text-[#F59E0B]">trending_up</span>
-             Trending Now
+             {t('trendingNow')}
            </h2>
            <button onClick={() => navigate('/products')} className="text-primary font-bold hover:underline flex items-center gap-1 text-sm uppercase tracking-wider">
-             View All <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+             {t('viewAll')} <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
            </button>
         </div>
 

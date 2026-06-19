@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useNotifications } from '../context/NotificationContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function TopNavBar() {
   const [scrolled, setScrolled] = useState(false);
@@ -14,6 +15,8 @@ export default function TopNavBar() {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const { language, setLanguage, t } = useLanguage();
+  const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -76,7 +79,7 @@ export default function TopNavBar() {
             </span>
             <input
               className="w-full bg-surface-container-high border border-outline-variant/50 rounded-full py-2 pl-10 pr-4 text-body-md font-body-md text-on-surface focus:outline-none focus:border-secondary focus:ring-1 focus:ring-secondary/50 transition-all placeholder:text-on-surface-variant/50"
-              placeholder="Search products, brands, or ask AI..."
+              placeholder={t('searchPlaceholder')}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -99,19 +102,54 @@ export default function TopNavBar() {
             <span className="material-symbols-outlined">{showMobileSearch ? 'close' : 'search'}</span>
           </button>
 
+          {/* Language Selector Dropdown */}
+          <div className="relative" onMouseLeave={() => setShowLanguageDropdown(false)}>
+            <button 
+              onClick={() => { setShowLanguageDropdown(!showLanguageDropdown); setShowWishlist(false); setShowNotifications(false); }}
+              className="p-2 hover:bg-surface-variant/50 rounded-full transition-colors relative flex items-center justify-center text-on-surface"
+              aria-label="Select Language"
+            >
+              <span className="material-symbols-outlined">language</span>
+              <span className="ml-1 text-xs font-bold uppercase">{language}</span>
+            </button>
+
+            {showLanguageDropdown && (
+              <div className="absolute right-0 mt-2 w-40 bg-surface-container-high border border-outline-variant/30 rounded-2xl p-2 shadow-2xl z-50 text-on-surface animate-fade-in">
+                <div className="flex flex-col gap-1">
+                  {[
+                    { code: 'en', label: 'English' },
+                    { code: 'ta', label: 'தமிழ்' },
+                    { code: 'hi', label: 'हिन्दी' },
+                    { code: 'es', label: 'Español' },
+                    { code: 'fr', label: 'Français' }
+                  ].map((lang) => (
+                    <button 
+                      key={lang.code}
+                      onClick={() => { setLanguage(lang.code); setShowLanguageDropdown(false); }}
+                      className={`px-3 py-2 rounded-xl text-left text-body-sm font-semibold transition-colors flex items-center justify-between ${language === lang.code ? 'bg-primary/20 text-primary' : 'hover:bg-surface-variant/50'}`}
+                    >
+                      <span>{lang.label}</span>
+                      {language === lang.code && <span className="material-symbols-outlined text-sm">check</span>}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
           {!loading && !isAuthenticated && (
             <div className="flex items-center gap-2 md:gap-4 ml-2">
               <Link
                 to="/login"
                 className="text-body-md font-bold text-on-surface hover:text-primary border border-outline-variant/50 rounded-full px-5 py-2 hover:border-primary transition-colors"
               >
-                Sign In
+                {t('login')}
               </Link>
               <Link
                 to="/register"
                 className="bg-primary text-on-primary text-body-md font-bold px-5 py-2 rounded-full hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
               >
-                Register
+                {t('register')}
               </Link>
             </div>
           )}
@@ -262,7 +300,7 @@ export default function TopNavBar() {
                 onClick={handleLogout}
                 className="text-label-sm font-semibold text-on-surface-variant hover:text-error px-2 py-1 rounded transition-colors"
               >
-                Logout
+                {t('logout')}
               </button>
             </div>
           ) : (
@@ -286,7 +324,7 @@ export default function TopNavBar() {
             </span>
             <input
               className="w-full bg-surface-container-high border border-outline-variant/50 rounded-full py-2 pl-9 pr-4 text-body-md text-on-surface focus:outline-none focus:border-secondary transition-all"
-              placeholder="Search products, brands, or ask AI..."
+              placeholder={t('searchPlaceholder')}
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -320,32 +358,32 @@ export default function TopNavBar() {
 
               <div className="flex flex-col gap-2">
                 <Link to="/" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/' ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
-                  <span className="material-symbols-outlined">home</span> Home
+                  <span className="material-symbols-outlined">home</span> {t('home')}
                 </Link>
                 <Link to="/products" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/products') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
-                  <span className="material-symbols-outlined">grid_view</span> Categories
+                  <span className="material-symbols-outlined">grid_view</span> {t('categories')}
                 </Link>
                 <Link to="/group-buy" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/group-buy') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
-                  <span className="material-symbols-outlined">group</span> Group Buy
+                  <span className="material-symbols-outlined">group</span> {t('groupBuy')}
                 </Link>
                 <Link to="/auctions" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/auctions') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
-                  <span className="material-symbols-outlined">gavel</span> Auctions
+                  <span className="material-symbols-outlined">gavel</span> {t('auctions')}
                 </Link>
                 <Link to="/budget-builder" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/budget-builder') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface-variant hover:bg-surface-variant/50 hover:text-on-surface'}`}>
-                  <span className="material-symbols-outlined">account_balance_wallet</span> Budget Builder
+                  <span className="material-symbols-outlined">account_balance_wallet</span> {t('budgetBuilder')}
                 </Link>
                 <Link to="/ai-assistant" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all ${location.pathname === '/ai-assistant' ? 'bg-primary text-on-primary font-bold shadow-md' : 'bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20'}`}>
-                  <span className="material-symbols-outlined">smart_toy</span> AI Concierge
+                  <span className="material-symbols-outlined">smart_toy</span> {t('aiAssistant')}
                 </Link>
 
                 {isAuthenticated && (user.role === 'SELLER' || user.role === 'ADMIN') && (
                   <Link to="/seller/dashboard" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/seller/dashboard') ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-secondary hover:bg-surface-variant/50'}`}>
-                    <span className="material-symbols-outlined">add_business</span> Seller Dashboard
+                    <span className="material-symbols-outlined">add_business</span> {t('sellerDashboard')}
                   </Link>
                 )}
                 {isAuthenticated && user.role === 'ADMIN' && (
                   <Link to="/admin/dashboard" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname.startsWith('/admin/dashboard') ? 'bg-error/20 text-error font-bold' : 'text-error hover:bg-error/10'}`}>
-                    <span className="material-symbols-outlined">admin_panel_settings</span> Admin Panel
+                    <span className="material-symbols-outlined">admin_panel_settings</span> {t('adminPanel')}
                   </Link>
                 )}
               </div>
@@ -355,13 +393,13 @@ export default function TopNavBar() {
               {isAuthenticated ? (
                 <>
                   <Link to="/profile" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/profile' ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface hover:bg-surface-variant/50'}`}>
-                    <span className="material-symbols-outlined">account_circle</span> View Profile
+                    <span className="material-symbols-outlined">account_circle</span> {t('viewProfile')}
                   </Link>
                   <Link to="/orders" onClick={() => setShowMobileMenu(false)} className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-colors ${location.pathname === '/orders' ? 'bg-secondary text-on-secondary font-bold shadow-md' : 'text-on-surface hover:bg-surface-variant/50'}`}>
-                    <span className="material-symbols-outlined">receipt_long</span> My Orders
+                    <span className="material-symbols-outlined">receipt_long</span> {t('myOrders')}
                   </Link>
                   <button onClick={() => { handleLogout(); setShowMobileMenu(false); }} className="w-full flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-error/10 text-error transition-colors text-left font-semibold">
-                    <span className="material-symbols-outlined">logout</span> Log Out
+                    <span className="material-symbols-outlined">logout</span> {t('logout')}
                   </button>
                 </>
               ) : (

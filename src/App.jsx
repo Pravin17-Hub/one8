@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { NotificationProvider } from './context/NotificationContext';
+import { LanguageProvider } from './context/LanguageContext';
 import TopNavBar from './components/TopNavBar';
 import SideNavBar from './components/SideNavBar';
 import Footer from './components/Footer';
@@ -35,9 +36,10 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 
 function App() {
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <NotificationProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <NotificationProvider>
           <BrowserRouter>
             <div className="flex flex-col min-h-screen">
           <TopNavBar />
@@ -160,6 +162,7 @@ function App() {
         </NotificationProvider>
       </WishlistProvider>
     </AuthProvider>
+    </LanguageProvider>
   );
 }
 

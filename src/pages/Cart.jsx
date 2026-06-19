@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
+import { useLanguage } from '../context/LanguageContext';
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -48,14 +50,14 @@ export default function Cart() {
 
   return (
     <main className="flex-1 lg:ml-64 p-margin-mobile md:p-margin-desktop min-h-screen">
-      <h1 className="text-headline-lg font-headline-lg text-on-surface mb-8">Your Cart</h1>
+      <h1 className="text-headline-lg font-headline-lg text-on-surface mb-8">{t('yourCart')}</h1>
       
       {cartItems.length === 0 ? (
         <div className="glass-card p-12 rounded-3xl text-center flex flex-col items-center">
           <span className="material-symbols-outlined text-[64px] text-on-surface-variant mb-4">remove_shopping_cart</span>
-          <h2 className="text-title-lg text-on-surface mb-2">Your cart is empty</h2>
-          <p className="text-body-md text-on-surface-variant mb-6">Looks like you haven't added any premium items yet.</p>
-          <Link to="/products" className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold">Start Shopping</Link>
+          <h2 className="text-title-lg text-on-surface mb-2">{t('cartIsEmpty')}</h2>
+          <p className="text-body-md text-on-surface-variant mb-6">{t('cartEmptyDesc')}</p>
+          <Link to="/products" className="bg-primary text-on-primary px-6 py-3 rounded-full font-bold">{t('startShopping')}</Link>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -85,19 +87,19 @@ export default function Cart() {
           
           <div className="lg:col-span-1">
             <div className="glass-card p-6 rounded-2xl sticky top-24">
-              <h2 className="text-title-lg text-on-surface mb-6">Order Summary</h2>
+              <h2 className="text-title-lg text-on-surface mb-6">{t('orderSummary')}</h2>
               <div className="space-y-4 text-body-md">
                 <div className="flex justify-between text-on-surface-variant">
-                  <span>Subtotal</span>
+                  <span>{t('subtotal')}</span>
                   <span>₹{subtotal.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-on-surface-variant">
-                  <span>Shipping</span>
-                  <span>Calculated at checkout</span>
+                  <span>{t('shipping')}</span>
+                  <span>{t('calculatedAtCheckout')}</span>
                 </div>
                 <hr className="border-white/10" />
                 <div className="flex justify-between text-title-md text-on-surface font-bold">
-                  <span>Total</span>
+                  <span>{t('total')}</span>
                   <span className="text-primary">₹{subtotal.toFixed(2)}</span>
                 </div>
               </div>
@@ -105,7 +107,7 @@ export default function Cart() {
                 onClick={() => navigate('/checkout')} 
                 className="w-full mt-8 bg-[#F59E0B] hover:bg-[#D97706] text-[#261400] font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all"
               >
-                Proceed to Checkout
+                {t('proceedToCheckout')}
                 <span className="material-symbols-outlined text-[20px]">arrow_forward</span>
               </button>
             </div>
